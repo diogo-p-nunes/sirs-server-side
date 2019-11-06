@@ -1,4 +1,5 @@
 import Cryptodome
+# import bluetooth
 from constants import *
 from utils import *
 
@@ -6,13 +7,18 @@ from utils import *
 Main function.
 
 Description:
-Write someting here
+Write something here
 """
 if __name__ == "__main__":
-
-	# start with initial menu
-	menu = Menu(INIT_MENU, options=INIT_MENU_OPTIONS, resolve_key_function=resolve_key_init_menu)
-	while True:
-		key = menu.show()
-		if key != -1:
-			menu = menu.resolve_key(key)
+    menu_navigation = []
+    menu = Menu(INIT_MENU, options=INIT_MENU_OPTIONS, add_return=False, resolve_key_function=resolveKeyInitMenu)
+    menu_navigation.append(menu)
+    while True:
+        menu = menu_navigation[-1]
+        key = menu.show()
+        if key != -1:
+            next_menu = menu.resolveKey(key)
+            if menu.text != next_menu.text:
+                menu_navigation.append(next_menu)
+        else:
+            menu_navigation = menu_navigation[:-1]
