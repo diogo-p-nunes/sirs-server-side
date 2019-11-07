@@ -18,7 +18,7 @@ def resolveKeyInitMenu(menu, key):
         return Menu(ENCRYPT_FILE_WITH_DEVICE_MENU, options=os.listdir(FILE_SYSTEM),
                     resolve_key_function=resolveKeyEncryptMenu)
     elif key == 2:
-        return Menu(OPEN_FILE_MENU, options=os.listdir(FILE_SYSTEM), resolve_key_function=resolveKeyConnectMenu)
+        return Menu(OPEN_FILE_MENU, options=os.listdir(FILE_SYSTEM), resolve_key_function=resolveKeyOpenFileMenu)
 
 
 def resolveKeyEncryptMenu(menu, key):
@@ -34,9 +34,10 @@ def resolveKeyEncryptMenu(menu, key):
     # encrypt metadata file with device public key
     # trash symmetric_key variable
     print("File encrypted with device.")
+    return menu
 
 
-def resolveKeyConnectMenu(menu, key):
+def resolveKeyOpenFileMenu(menu, key):
     filename = getFileName(key)
 
     print("Pre-decryption:")
