@@ -1,5 +1,5 @@
 import Cryptodome
-# import bluetooth
+import bluetooth
 from constants import *
 from utils import *
 
