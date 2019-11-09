@@ -1,6 +1,7 @@
 # variables
 FILE_SYSTEM = "server-file-system/"
-
+DATABASES = "databases/"
+REGISTERED_DEVICES = DATABASES+"registereddevices.txt"
 # Error messages
 INVALID_OPTION = "Invalid option. Enter again."
 NO_DEVICE = "No device connected. Connect a device first."
