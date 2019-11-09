@@ -2,6 +2,8 @@ import Cryptodome
 import bluetooth
 from constants import *
 from utils import *
+from BTManager import *
+from MenuManager import *
 
 
 """
