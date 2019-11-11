@@ -3,7 +3,10 @@ from encryptor import *
 from utils import *
 
 
-def getEligibleFiles(btManager):
+def getEncryptableFiles(btManager):
+    if not btManager.hasConnectedDevices():
+        print("[MENU] No device connected :(")
+        return None
     lista = [file for file in os.listdir(FILE_SYSTEM) if not file.startswith("metadata")]
     device =btManager.getDevice()
     for line in readFile(LINKEDFILES):
@@ -12,23 +15,28 @@ def getEligibleFiles(btManager):
             lista.remove((parts[1].split("/"))[-1])
     return lista
 
+def getOpenableFiles(btManager):
+    lista = [file for file in os.listdir(FILE_SYSTEM) if not file.startswith("metadata")]
+    device =btManager.getDevice()
+    for line in readFile(LINKEDFILES):
+        parts = line.split("|")
+        if parts[0] != device.addr:
+            lista.remove((parts[1].split("/"))[-1])
+    return lista
 
 def resolveKeyInitMenu(menu, key, btManager):
     if key == 0:
         connectDevice(btManager)
         return menu
     elif key == 1:
-        return Menu(ENCRYPT_FILE_WITH_DEVICE_MENU, options=getEligibleFiles(btManager),
+        return Menu(ENCRYPT_FILE_WITH_DEVICE_MENU, options=getEncryptableFiles(btManager),
                     resolve_key_function=resolveKeyEncryptMenu)
     elif key == 2:
         return Menu(OPEN_FILE_MENU, options=os.listdir(FILE_SYSTEM), resolve_key_function=resolveKeyOpenFileMenu)
 
 
 def resolveKeyEncryptMenu(menu, key, btManager):
-    filename = getFileName(key,getEligibleFiles(btManager))
-    if not btManager.hasConnectedDevices():
-        print("[MENU] No device connected :(")
-        return menu
+    filename = getFileName(key,getEncryptableFiles(btManager))
 
     #show list of user devices to select from once we implement multiple devices
     # for now just get the only connected device
@@ -50,7 +58,7 @@ def resolveKeyEncryptMenu(menu, key, btManager):
     print("[MENU] Added file link to databases")
     print("File encrypted with device.")
 
-    menu.setOptions(getEligibleFiles(btManager))
+    menu.setOptions(getEncryptableFiles(btManager))
     return menu
 
 
@@ -86,7 +94,10 @@ class Menu:
         answer = None
         while invalid:
             answer = eval((input("Enter choice: ")))
-            if self.addReturn and answer == -1:
+            if answer != -1 and self.options is None:
+                invalid = True
+                print(INVALID_OPTION)
+            elif self.addReturn and answer == -1:
                 invalid = False
             elif answer in range(len(self.options)):
                 invalid = False

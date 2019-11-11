@@ -81,7 +81,7 @@ class BtManager:
                 # print("Reading entry:", addr, puk)
                 if addr == device.addr:
                     device.sendMessage("OK")
-                    device.setPukFilename(puk_filename)
+                    device.setPukFilename(puk_filename.substring(0,-2))
                     return True
             device.sendMessage("NOK")
             return False
