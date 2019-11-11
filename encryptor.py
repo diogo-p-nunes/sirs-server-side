@@ -32,10 +32,8 @@ def decryptFile(filename, symmetric_key):
 def encryptSymmInMetadata(filename, symmetric_key, pukFile):
 
     puk = RSA.import_key(open(pukFile).read())
-    print(symmetric_key)
     cipher_rsa = PKCS1_OAEP.new(puk)
     enc_sym_key = cipher_rsa.encrypt(symmetric_key)
-    print(enc_sym_key)
 
     parts = filename.split("/")
     base = '/'.join(parts[:-1])

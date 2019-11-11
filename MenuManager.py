@@ -5,12 +5,12 @@ from utils import *
 
 def getEligibleFiles(btManager):
     lista = [file for file in os.listdir(FILE_SYSTEM) if not file.startswith("metadata")]
-    print(lista)
     device =btManager.getDevice()
     for line in readFile(LINKEDFILES):
         parts = line.split("|")
-        if parts[0] != device.addr or parts[2] == "E":
+        if parts[0] != device.addr or parts[2].startswith("E"):
             lista.remove((parts[1].split("/"))[-1])
+    return lista
 
 
 def resolveKeyInitMenu(menu, key, btManager):
@@ -25,7 +25,7 @@ def resolveKeyInitMenu(menu, key, btManager):
 
 
 def resolveKeyEncryptMenu(menu, key, btManager):
-    filename = getFileName(key)
+    filename = getFileName(key,getEligibleFiles(btManager))
     if not btManager.hasConnectedDevices():
         print("[MENU] No device connected :(")
         return menu
@@ -46,10 +46,11 @@ def resolveKeyEncryptMenu(menu, key, btManager):
     # trash symmetric_key variable
     del symmetric_key
     print("[MENU] Deleted symmetric key")
-    writeToFile(LINKEDFILES, device.addr + "|" + filename +"|E", "w+")
+    writeToFile(LINKEDFILES, device.addr + "|" + filename +"|E\n", "a")
     print("[MENU] Added file link to databases")
     print("File encrypted with device.")
 
+    menu.setOptions(getEligibleFiles(btManager))
     return menu
 
 
@@ -98,3 +99,6 @@ class Menu:
         # custom handle of user answer
         # does something specific and returns some menu
         return self.resolve_key_function(self, key, btManager)
+
+    def setOptions(self, options):
+        self.options = options

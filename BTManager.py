@@ -88,7 +88,7 @@ class BtManager:
 
     def registerDevice(self, device):
         print("[BT] Registering device ...")
-        writeToFile(REGISTERED_DEVICES, device.getRegistrationEntry(), 'w+')
+        writeToFile(REGISTERED_DEVICES, device.getRegistrationEntry() + "\n", 'a')
         device.sendMessage("OK")
         print("[BT] Device Registered")
         return True

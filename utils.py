@@ -35,8 +35,8 @@ def connectDevice(btManager):
         print("[MENU] Device NOT connected.")
 
 
-def getFileName(key):
-    return os.getcwd() + "/" + FILE_SYSTEM + os.listdir(FILE_SYSTEM)[key]
+def getFileName(key,filelist):
+    return os.getcwd() + "/" + FILE_SYSTEM + filelist[key]
 
 
 
