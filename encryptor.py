@@ -1,3 +1,5 @@
+import base64
+
 from Cryptodome.Cipher import AES
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_v1_5 as Cipher_PKCS1_v1_5
@@ -30,13 +32,13 @@ def decryptFile(filename, symmetric_key):
 
 def encryptSymmInMetadata(filename, symmetric_key, puk):
     # remove this line when actual puk is sent
-    puk = """-----BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBA3UAA4GNADCBiQKBgQC35eMaYoJXEoJt5HxarHkzDBEMU3qIWE0HSQ77CwP/8UbX07W2XKwngUyY4k6Hl2M/n9TOZMZsiBzer/fqV+QNPN1m9M94eUm2gQgwkoRj5battRCaNJK/23GGpCsTQatJN8PZBhJBb2Vlsvw5lFrSdMT1R7vaz+2EeNR/FitFXwIDAQAB
------END PUBLIC KEY-----"""
+    key64 = "MIGfMA0GCSqGSIb3DQEBA3UAA4GNADCBiQKBgQC35eMaYoJXEoJt5HxarHkzDBEMU3qIWE0HSQ77CwP/8UbX07W2XKwngUyY4k6Hl2M/n9TOZMZsiBzer/fqV+QNPN1m9M94eUm2gQgwkoRj5battRCaNJK/23GGpCsTQatJN8PZBhJBb2Vlsvw5lFrSdMT1R7vaz+2EeNR/FitFXwIDAQA"
 
     msg = "test"
     print(puk)
-    keyPub = RSA.importKey(puk)
+
+    keyDER = base64.b64decode(key64 + '====')
+    keyPub = RSA.importKey(keyDER)
     cipher = Cipher_PKCS1_v1_5.new(keyPub)
     emsg = cipher.encrypt(msg.encode())
     print(emsg)
