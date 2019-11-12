@@ -16,6 +16,9 @@ def getEncryptableFiles(btManager):
     return lista
 
 def getOpenableFiles(btManager):
+    if not btManager.hasConnectedDevices():
+        print("[MENU] No device connected :(")
+        return None
     lista = [file for file in os.listdir(FILE_SYSTEM) if not file.startswith("metadata")]
     device =btManager.getDevice()
     for line in readFile(LINKEDFILES):
@@ -32,7 +35,7 @@ def resolveKeyInitMenu(menu, key, btManager):
         return Menu(ENCRYPT_FILE_WITH_DEVICE_MENU, options=getEncryptableFiles(btManager),
                     resolve_key_function=resolveKeyEncryptMenu)
     elif key == 2:
-        return Menu(OPEN_FILE_MENU, options=os.listdir(FILE_SYSTEM), resolve_key_function=resolveKeyOpenFileMenu)
+        return Menu(OPEN_FILE_MENU, options=getOpenableFiles(btManager), resolve_key_function=resolveKeyOpenFileMenu)
 
 
 def resolveKeyEncryptMenu(menu, key, btManager):
@@ -63,10 +66,12 @@ def resolveKeyEncryptMenu(menu, key, btManager):
 
 
 def resolveKeyOpenFileMenu(menu, key, btManager):
-    filename = getFileName(key)
+    filename = getFileName(key,getOpenableFiles(btManager))
+    device = btManager.getDevice()
     print("Pre-decryption:")
     openFile(filename)
-    symmetric_key = requestDecryptionKey(filename)
+    symmetric_key = device.requestDecryptionKey(filename)
+    print(symmetric_key)
     decryptFile(filename, symmetric_key)
     print("\nPost-decryption:")
     openFile(filename)

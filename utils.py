@@ -5,9 +5,10 @@ import os
 
 
 def getFileByteArray(filename):
-    with open(filename, 'r') as f:
+    with open(filename, 'rb') as f:
         output = f.read()
-    return bytearray(output, 'utf-8')
+    return output
+    #return bytearray(output, 'utf-8')
 
 def writeToFile(filename, data, type):
     with open(filename, type) as f:
@@ -19,9 +20,12 @@ def openFile(filename):
     output, error = process.communicate()
     print(output)
 
-def readFile(filename):
-    with open(filename, "r") as f:
-        output = f.readlines()
+def readFile(filename, type="r"):
+    with open(filename, type) as f:
+        if type != "rb":
+            output = f.readlines()
+        elif type == "rb":
+            output = f.read()
     return output
 
 def connectDevice(btManager):

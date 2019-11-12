@@ -25,11 +25,20 @@ class Device:
             except IOError:
                 print("[DEVICE] Error: Puk not received")
                 return None
-
             name = PUKDIR + "/" + self.addr.replace(':', '') + ".pem"
             writeToFile(name, data, 'wb')
             self.setPukFilename(name)
             return self.getPukFilename()
+
+    def readMessage(self, size):
+        try:
+            data = self.socket.recv(size)
+            if len(data) == 0:
+                return None
+            return data
+        except IOError:
+            print("[DEVICE] Error: Message not received")
+            return None
 
     def isConnected(self):
         if self.addr is None and self.socket is None:
@@ -43,6 +52,23 @@ class Device:
     def sendMessage(self, m):
         self.socket.send(m)
 
+    def requestDecryptionKey(self, filename):
+        self.sendMessage("REQ_DESENCRYPT")
+        answer = self.readMessage(2).decode("utf-8")
+        print(answer)
+        metafile = FILE_SYSTEM + "metadata." + filename.split("/")[-1]
+        if answer == "OK":
+            print(readFile(metafile, "rb"))
+            size = os.path.getsize(metafile)
+            print("[DEVICE] Sending size")
+            self.sendMessage(str(size))
+            print("[DEVICE] Sending metadata..")
+            self.sendMessage(readFile(metafile, "rb"))
+            sym_key = self.readMessage(16)
+            return sym_key
+        else:
+            print("[DEVICE] Error: Decryption key not received")
+            return None
 
 class BtManager:
     def __init__(self):
@@ -81,7 +107,7 @@ class BtManager:
                 # print("Reading entry:", addr, puk)
                 if addr == device.addr:
                     device.sendMessage("OK")
-                    device.setPukFilename(puk_filename.substring(0,-2))
+                    device.setPukFilename(puk_filename[:-2])
                     return True
             device.sendMessage("NOK")
             return False
