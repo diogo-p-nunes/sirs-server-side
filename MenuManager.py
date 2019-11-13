@@ -50,14 +50,14 @@ def resolveKeyEncryptMenu(menu, key, btManager):
     symmetric_key = generateSymmKey()
     print("[MENU] Generated symmetric key")
 
-    encryptFile(filename, symmetric_key)
+    mac, nonce = encryptFile(filename, symmetric_key)
     print("[MENU] Encrypted file with symmetric key")
     encryptSymmInMetadata(filename, symmetric_key, device.getPukFilename())
     print("[MENU] Encrypted metadata file with device PUK")
     # trash symmetric_key variable
     del symmetric_key
     print("[MENU] Deleted symmetric key")
-    writeToFile(LINKEDFILES, device.addr + "|" + filename +"|E\n", "a")
+    writeToFile(LINKEDFILES, device.addr + "|" + filename +"|E|" + mac.decode() + "|" + nonce.decode() + "\n" , "a")
     print("[MENU] Added file link to databases")
     print("File encrypted with device.")
 
@@ -71,7 +71,6 @@ def resolveKeyOpenFileMenu(menu, key, btManager):
     print("Pre-decryption:")
     openFile(filename)
     symmetric_key = device.requestDecryptionKey(filename)
-    print(symmetric_key)
     decryptFile(filename, symmetric_key)
     print("\nPost-decryption:")
     openFile(filename)

@@ -1,2 +1,0 @@
-C0:EE:FB:E2:D0:D3|/home/heteronimo/Desktop/sirs-server-side/server-file-system/file3.txt|E
-C0:EE:FB:E2:D0:D3|/home/heteronimo/Desktop/sirs-server-side/server-file-system/file4.txt|E

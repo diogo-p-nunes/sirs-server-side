@@ -4,8 +4,8 @@ from constants import *
 import os
 
 
-def getFileByteArray(filename):
-    with open(filename, 'rb') as f:
+def readFileForEncryption(filename):
+    with open(filename, 'r') as f:
         output = f.read()
     return output
     #return bytearray(output, 'utf-8')
