@@ -1,12 +1,10 @@
-
+from Menu import Menu
+from BtManager import BtManager
 from constants import *
-from utils import *
-from BTManager import *
-from MenuManager import *
-
+from resolvers import *
 
 """
-Main function.
+Main function
 
 Description:
 Write something here
