@@ -48,6 +48,18 @@ def resolveKeyOpenFileMenu(menu, key, btManager):
     decryptFile(filename, symmetric_key, digest, nonce)
     print("[MENU] Post-decryption:", readFile(filename, "r"))
 
+    # change the bit of encryption in the LINKEDFILES database so that we know that this file is decrypted
+    lines = readFile(LINKEDFILES, 'r')
+    newlines = []
+    for line in lines:
+        l_addr, l_filename, l_ebit = line.replace('\n', '').split('|')
+        print(l_addr, l_filename, l_ebit)
+        if l_addr == device.addr and l_filename == filename and l_ebit == 'E':
+            line = line.replace('|E', '|D')
+        newlines.append(line)
 
+    writeToFile(LINKEDFILES, '\n'.join(newlines), 'w')
+
+    print('[MENU] Changed LINKEDFILES encryption bit to: D')
 
     return menu

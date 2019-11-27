@@ -36,7 +36,7 @@ def getEncryptableFiles(btManager):
     if not btManager.hasConnectedDevices():
         print("[MENU] No device connected :(")
         return None
-    lista = [file for file in os.listdir(FILE_SYSTEM) if not file.startswith("metadata")]
+    lista = [file for file in sorted(os.listdir(FILE_SYSTEM)) if not file.startswith("metadata")]
     device = btManager.getDevice()
     for line in readFile(LINKEDFILES):
         parts = line.split("|")
@@ -49,7 +49,7 @@ def getOpenableFiles(btManager):
     if not btManager.hasConnectedDevices():
         print("[MENU] No device connected :(")
         return None
-    lista = [file for file in os.listdir(FILE_SYSTEM) if not file.startswith("metadata")]
+    lista = [file for file in sorted(os.listdir(FILE_SYSTEM)) if not file.startswith("metadata")]
     device = btManager.getDevice()
     for line in readFile(LINKEDFILES):
         parts = line.split("|")
