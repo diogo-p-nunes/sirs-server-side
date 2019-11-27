@@ -43,6 +43,17 @@ def resolveKeyOpenFileMenu(menu, key, btManager):
     filename = getFileName(key, getOpenableFiles(btManager))
     device = btManager.getDevice()
     print("[MENU] Got device")
+
+    # check if file was already decrypted by the device
+    lines = readFile(LINKEDFILES, 'r')
+    newlines = []
+    for line in lines:
+        l_addr, l_filename, l_ebit = line.replace('\n', '').split('|')
+        if l_addr == device.addr and l_filename == filename and l_ebit == 'D':
+            print("[MENU] File already decrypted by device")
+            print("[MENU] Post-decryption:", readFile(filename, "r"))
+            return menu
+
     print("[MENU] Pre-decryption:", readFile(filename, "rb"))
     symmetric_key, digest, nonce = device.requestMetadataContent(filename)
     decryptFile(filename, symmetric_key, digest, nonce)
@@ -53,13 +64,10 @@ def resolveKeyOpenFileMenu(menu, key, btManager):
     newlines = []
     for line in lines:
         l_addr, l_filename, l_ebit = line.replace('\n', '').split('|')
-        print(l_addr, l_filename, l_ebit)
         if l_addr == device.addr and l_filename == filename and l_ebit == 'E':
             line = line.replace('|E', '|D')
         newlines.append(line)
 
     writeToFile(LINKEDFILES, '\n'.join(newlines), 'w')
-
     print('[MENU] Changed LINKEDFILES encryption bit to: D')
-
     return menu
