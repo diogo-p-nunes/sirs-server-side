@@ -2,6 +2,8 @@ from Menu import Menu
 from constants import *
 from utils import *
 from encryptor import *
+import fileinput
+import sys
 
 
 def resolveKeyInitMenu(menu, key, btManager):
@@ -25,15 +27,14 @@ def resolveKeyEncryptMenu(menu, key, btManager):
     print("[MENU] Generated symmetric key")
     digest, nonce = encryptFile(filename, symmetric_key)
     print("[MENU] Encrypted file with symmetric key")
-    encryptSymmInMetadata(filename, symmetric_key, device.getPukFilename())
+    encryptMetadata(filename, symmetric_key, digest, nonce, device.getPukFilename())
     print("[MENU] Encrypted metadata file with device PUK")
     # trash symmetric_key variable
     del symmetric_key
     print("[MENU] Deleted symmetric key")
-    # writeToFile(LINKEDFILES, device.addr + "|" + filename +"|E|" + digest.decode() + "|" + nonce.decode() + "\n", "a")
     writeToFile(LINKEDFILES, device.addr + "|" + filename + "|E" + "\n", "a")
     print("[MENU] Added file link to databases")
-    print("[MENU] File encrypted with device.")
+    print("[MENU] File encrypted with device")
     menu.setOptions(getEncryptableFiles(btManager))
     return menu
 
@@ -43,7 +44,10 @@ def resolveKeyOpenFileMenu(menu, key, btManager):
     device = btManager.getDevice()
     print("[MENU] Got device")
     print("[MENU] Pre-decryption:", readFile(filename, "rb"))
-    symmetric_key = device.requestDecryptionKey(filename)
-    decryptFile(filename, symmetric_key)
-    print("[MENU] REMOVE RB AFTER DECRYPTION IS DONE Post-decryption:", readFile(filename, "rb"))
+    symmetric_key, digest, nonce = device.requestMetadataContent(filename)
+    decryptFile(filename, symmetric_key, digest, nonce)
+    print("[MENU] Post-decryption:", readFile(filename, "r"))
+
+
+
     return menu

@@ -15,7 +15,7 @@ class Device:
             return self.puk_filename
         else:
             # ask data from android
-            print("[DEVICE] Requesting Puk to Android")
+            print("[DEVICE] Requesting PUK to Android")
             try:
                 data = self.socket.recv(1076)
                 if len(data) == 0:
@@ -50,8 +50,8 @@ class Device:
     def sendMessage(self, m):
         self.socket.send(m)
 
-    def requestDecryptionKey(self, filename):
-        print("[DEVICE] Requesting decryption key")
+    def requestMetadataContent(self, filename):
+        print("[DEVICE] Requesting metadata content")
         self.sendMessage("REQ_DESENCRYPT")
         answer = self.readMessage(2).decode("utf-8")
         metafile = FILE_SYSTEM + "metadata." + filename.split("/")[-1]
@@ -61,9 +61,11 @@ class Device:
             self.sendMessage(str(size))
             print("[DEVICE] Sending metadata")
             self.sendMessage(readFile(metafile, "rb"))
-            sym_key = self.readMessage(16)
-            print("[DEVICE] Got decryption key")
-            return sym_key
+            content = self.readMessage(120)
+            print("[DEVICE] Got metadata content")
+            print("[DEVICE] Metadata content received:", content)
+            # returns list = [symmetric-key, digest, nonce]
+            return content.split(b'\n')
         else:
             print("[DEVICE] Error: Decryption key not received")
             return None
