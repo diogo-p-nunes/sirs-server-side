@@ -1,6 +1,7 @@
 import subprocess
 import os
 from constants import *
+import datetime
 
 
 def writeToFile(filename, data, mode):
@@ -58,4 +59,12 @@ def getOpenableFiles(btManager):
     return lista
 
 
-
+# intermediate version
+def addTimestamp(m):
+    timestamp = str(datetime.datetime.utcnow())
+    if isinstance(m, (bytes, bytearray)):
+        #m = m + b'||' + timestamp.encode()
+        m = m
+    else:
+        m = m + '||' + timestamp
+    return m

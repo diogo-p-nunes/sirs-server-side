@@ -47,8 +47,8 @@ class Device:
     def getRegistrationEntry(self):
         return self.addr + "|" + self.getPukFilename()
 
-    # missing extra layer of security
     def sendMessage(self, m):
+        m = addTimestamp(m)
         self.socket.send(m)
 
     def requestMetadataContent(self, filename):
@@ -66,7 +66,7 @@ class Device:
             print("[DEVICE] Got metadata content")
             print("[DEVICE] Metadata content received:", content)
             # returns list = [symmetric-key, digest, nonce]
-            return content.split(b'\n')
+            return content.split(b'|')
         else:
             print("[DEVICE] Error: Decryption key not received")
             return None
