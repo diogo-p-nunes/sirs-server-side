@@ -51,23 +51,28 @@ def resolveKeyOpenFileMenu(menu, key, btManager):
         l_addr, l_filename, l_ebit = line.replace('\n', '').split('|')
         if l_addr == device.addr and l_filename == filename and l_ebit == 'D':
             print("[MENU] File already decrypted by device")
-            print("[MENU] Post-decryption:", readFile(filename, "r"))
+            print("[MENU] Post-decryption:", ' '.join(readFile(filename, "r")))
             return menu
 
-    print("[MENU] Pre-decryption:", readFile(filename, "rb"))
-    symmetric_key, digest, nonce = device.requestMetadataContent(filename)
-    decryptFile(filename, symmetric_key, digest, nonce)
-    print("[MENU] Post-decryption:", readFile(filename, "r"))
+        elif l_addr == device.addr and l_filename == filename and l_ebit == 'E':
+            print("[MENU] Pre-decryption:", readFile(filename, "rb"))
+            symmetric_key, digest, nonce = device.requestMetadataContent(filename)
+            decryptFile(filename, symmetric_key, digest, nonce)
+            print("[MENU] Post-decryption:", ' '.join(readFile(filename, "r")))
 
-    # change the bit of encryption in the LINKEDFILES database so that we know that this file is decrypted
-    lines = readFile(LINKEDFILES, 'r')
-    newlines = []
-    for line in lines:
-        l_addr, l_filename, l_ebit = line.replace('\n', '').split('|')
-        if l_addr == device.addr and l_filename == filename and l_ebit == 'E':
-            line = line.replace('|E', '|D')
-        newlines.append(line)
+            # change the bit of encryption in the LINKEDFILES database so that we know that this file is decrypted
+            lines = readFile(LINKEDFILES, 'r')
+            newlines = []
+            for line in lines:
+                l_addr, l_filename, l_ebit = line.replace('\n', '').split('|')
+                if l_addr == device.addr and l_filename == filename and l_ebit == 'E':
+                    line = line.replace('|E', '|D')
+                newlines.append(line)
 
-    writeToFile(LINKEDFILES, '\n'.join(newlines), 'w')
-    print('[MENU] Changed LINKEDFILES encryption bit to: D')
+            writeToFile(LINKEDFILES, '\n'.join(newlines), 'w')
+            print('[MENU] Changed LINKEDFILES encryption bit to: D')
+            return menu
+
+    print("[MENU] File is public")
+    print("[MENU] Content:", ' '.join(readFile(filename, "r")))
     return menu
