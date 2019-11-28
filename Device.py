@@ -47,6 +47,7 @@ class Device:
     def getRegistrationEntry(self):
         return self.addr + "|" + self.getPukFilename()
 
+    # missing extra layer of security
     def sendMessage(self, m):
         self.socket.send(m)
 
