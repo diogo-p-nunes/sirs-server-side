@@ -2,6 +2,9 @@ import subprocess
 import os
 from constants import *
 import datetime
+from Crypto.PublicKey import RSA
+from Crypto.Signature import pkcs1_15
+from Crypto.Hash import SHA256
 
 
 def writeToFile(filename, data, mode):
@@ -40,9 +43,9 @@ def getEncryptableFiles(btManager):
     lista = [file for file in sorted(os.listdir(FILE_SYSTEM)) if not file.startswith("metadata")]
     device = btManager.getDevice()
     for line in readFile(LINKEDFILES):
+        # remove every file that is not public
         parts = line.split("|")
-        if parts[0] != device.addr or parts[2].startswith("E"):
-            lista.remove((parts[1].split("/"))[-1])
+        lista.remove((parts[1].split("/"))[-1])
     return lista
 
 
@@ -61,10 +64,30 @@ def getOpenableFiles(btManager):
 
 # intermediate version
 def addTimestamp(m):
+    print("+ timestamp")
     timestamp = str(datetime.datetime.utcnow())
+    #if isinstance(m, (bytes, bytearray)):
+    #    #m = m + b'||' + timestamp.encode()
+    #    m = m
+    #else:
+    #    m = m + TSMP + timestamp
+    return m + TSMP + timestamp.encode()
+
+
+def addSignature(m):
+    print("+ signature")
+    return m + SIGN + messageSignature(m)
+
+
+def convertToBytes(m):
     if isinstance(m, (bytes, bytearray)):
-        #m = m + b'||' + timestamp.encode()
-        m = m
+        return m
     else:
-        m = m + '||' + timestamp
-    return m
+        return m.encode()
+
+
+# intermediate version
+def messageSignature(m):
+    priv = RSA.import_key(open("private_key.pem").read())
+    h = SHA256.new(m)
+    return pkcs1_15.new(priv).sign(h)

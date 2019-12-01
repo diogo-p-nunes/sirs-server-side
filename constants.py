@@ -1,3 +1,8 @@
+# message splitters and concatenators
+CNT = b'||'
+TSMP = b'|T|'
+SIGN = b'|S|'
+
 # variables
 FILE_SYSTEM = "server-file-system/"
 DATABASES = "databases/"

@@ -64,12 +64,12 @@ def resolveKeyOpenFileMenu(menu, key, btManager):
             lines = readFile(LINKEDFILES, 'r')
             newlines = []
             for line in lines:
-                l_addr, l_filename, l_ebit = line.replace('\n', '').split('|')
-                if l_addr == device.addr and l_filename == filename and l_ebit == 'E':
+                l_addr, l_filename, l_ebit = line.split('|')
+                if l_addr == device.addr and l_filename == filename and l_ebit.startswith('E'):
                     line = line.replace('|E', '|D')
                 newlines.append(line)
 
-            writeToFile(LINKEDFILES, '\n'.join(newlines), 'w')
+            writeToFile(LINKEDFILES, ''.join(newlines), 'w')
             print('[MENU] Changed LINKEDFILES encryption bit to: D')
             return menu
 

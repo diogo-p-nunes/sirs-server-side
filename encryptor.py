@@ -35,7 +35,7 @@ def encryptMetadata(filename, symmetric_key, digest, nonce, pukFile):
     print("[ENC] Symm key:", symmetric_key)
     puk = RSA.import_key(open(pukFile).read())
     cipher_rsa = PKCS1_OAEP.new(puk)
-    content = symmetric_key + b'|' + digest + b'|' + nonce
+    content = symmetric_key + CNT + digest + CNT + nonce
     print("[ENC] Metadata content to encrypt:", content)
     ciphertext = cipher_rsa.encrypt(content)
 

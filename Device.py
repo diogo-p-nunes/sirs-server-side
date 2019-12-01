@@ -48,7 +48,9 @@ class Device:
         return self.addr + "|" + self.getPukFilename()
 
     def sendMessage(self, m):
+        m = convertToBytes(m)
         m = addTimestamp(m)
+        #m = addSignature(m)
         self.socket.send(m)
 
     def requestMetadataContent(self, filename):
@@ -66,7 +68,7 @@ class Device:
             print("[DEVICE] Got metadata content")
             print("[DEVICE] Metadata content received:", content)
             # returns list = [symmetric-key, digest, nonce]
-            return content.split(b'|')
+            return content.split(CNT)
         else:
             print("[DEVICE] Error: Decryption key not received")
             return None
