@@ -98,10 +98,9 @@ def threadedCheckIfDisconnected(btManager, run_event):
         sleep(5)
 
 
-
-def confAssurance(devices):
+def confAssurance(devices, shutting_down=False):
     for device in devices:
-        if not device.isConnected() and not device.doneConfAssurance:
+        if (not device.isConnected() and not device.doneConfAssurance) or shutting_down:
             print("[CONFASS] Device %s disconnected." % device.addr)
             print("[CONFASS] Performing Conf-Assurance.")
 
@@ -112,10 +111,10 @@ def confAssurance(devices):
                 l_addr, l_filename, l_ebit = line.replace('\n', '').split('|')
                 if l_addr == device.addr and l_ebit == 'D':
                     # encrypt file again
-                    print("[CONFASS] Encrypting file:", l_filename, end='')
+                    print("[CONFASS] Encrypting file:", l_filename)
                     encryptFileWithDevice(l_filename, device)
                     line = line.replace('|D', '|E')
-                    print(" ... done.")
+                    print("[CONFASS] File %s done." % l_filename)
                 newlines.append(line)
 
             writeToFile(LINKEDFILES, ''.join(newlines), 'w')

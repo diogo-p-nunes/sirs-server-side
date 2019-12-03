@@ -40,5 +40,5 @@ if __name__ == "__main__":
         print("[Menu] Shutting down ... ")
         run_event.clear()
         thread.join()
-        confAssurance(btManager.connected_devices)
+        confAssurance(btManager.connected_devices, shutting_down=True)
         exit()
