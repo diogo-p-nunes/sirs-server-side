@@ -1,0 +1,4 @@
+A4:E4:B8:93:DE:A9|/home/juan/Desktop/sirs-server-side/server-file-system/file1.txt|D
+A4:E4:B8:93:DE:A9|/home/juan/Desktop/sirs-server-side/server-file-system/file2.txt|D
+A4:E4:B8:93:DE:A9|/home/juan/Desktop/sirs-server-side/server-file-system/file3.txt|D
+A4:E4:B8:93:DE:A9|/home/juan/Desktop/sirs-server-side/server-file-system/file4.txt|D

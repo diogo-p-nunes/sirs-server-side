@@ -1,3 +1,4 @@
+import hashlib
 import subprocess
 import os
 from constants import *
@@ -74,9 +75,9 @@ def addTimestamp(m):
     return m + TSMP + timestamp.encode()
 
 
-def addSignature(m):
+def addSignature(m,original):
     print("+ signature")
-    return m + SIGN + messageSignature(m)
+    return m+SIGN+messageSignature(original)
 
 
 def convertToBytes(m):
@@ -87,7 +88,8 @@ def convertToBytes(m):
 
 
 # intermediate version
-def messageSignature(m):
-    priv = RSA.import_key(open("private_key.pem").read())
-    h = SHA256.new(m)
+def messageSignature(original):
+    #priv = RSA.import_key(open("private_key.pem").read())
+    priv = RSA.importKey(open("CA_keys/private.key").read())
+    h = SHA256.new(original)
     return pkcs1_15.new(priv).sign(h)

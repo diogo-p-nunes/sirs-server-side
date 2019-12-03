@@ -49,8 +49,9 @@ class Device:
 
     def sendMessage(self, m):
         m = convertToBytes(m)
+        original = m
         m = addTimestamp(m)
-        #m = addSignature(m)
+        #m = addSignature(m,original)
         self.socket.send(m)
 
     def requestMetadataContent(self, filename):

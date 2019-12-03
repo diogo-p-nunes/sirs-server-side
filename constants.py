@@ -1,7 +1,7 @@
 # message splitters and concatenators
 CNT = b'||'
-TSMP = b'|T|'
-SIGN = b'|S|'
+TSMP = b'|X|'
+SIGN = b'|X|'
 
 # variables
 FILE_SYSTEM = "server-file-system/"
@@ -9,6 +9,7 @@ DATABASES = "databases/"
 REGISTERED_DEVICES = DATABASES+"registereddevices.txt"
 PUKDIR = "./pukdir"
 LINKEDFILES = DATABASES + "filedevicelinks.txt"
+CAKEYS = "CA_keys/"
 
 # Error messages
 INVALID_OPTION = "Invalid option. Enter again."
