@@ -75,8 +75,9 @@ def addTimestamp(m):
 
 
 # intermediate version
-def addSignature(m,original):
+def addSignature(m, original):
     print("+ signature")
+    print("Signature size =" , len(messageSignature(original)))
     return m+SIGN+messageSignature(original)
 
 

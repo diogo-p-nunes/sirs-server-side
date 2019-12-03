@@ -52,7 +52,7 @@ class BtManager:
                     device.sendMessage("OK")
                     device.setPukFilename(puk_filename[:-1])
                     return True
-            device.sendMessage("NOK")
+            device.sendMessage("NO")
             return False
 
     def registerDevice(self, device):

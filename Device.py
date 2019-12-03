@@ -60,18 +60,17 @@ class Device:
         m = convertToBytes(m)
         original = m
         m = addTimestamp(m)
-        #m = addSignature(m,original)
+        m = addSignature(m,original)
+        #print(len(m))
+        #print(m)
         self.socket.send(m)
 
     def requestMetadataContent(self, filename):
         print("[DEVICE] Requesting metadata content")
-        self.sendMessage("REQ_DESENCRYPT")
+        self.sendMessage("RE")
         answer = self.readMessage(2).decode("utf-8")
         metafile = FILE_SYSTEM + "metadata." + filename.split("/")[-1]
         if answer == "OK":
-            size = os.path.getsize(metafile)
-            print("[DEVICE] Sending metadata size")
-            self.sendMessage(str(size))
             print("[DEVICE] Sending metadata")
             self.sendMessage(readFile(metafile, "rb"))
             content = self.readMessage(120)
