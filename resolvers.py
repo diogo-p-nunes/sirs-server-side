@@ -1,7 +1,7 @@
 from Menu import Menu
 from constants import *
-from utils import *
-from encryptor import *
+from utils import getEncryptableFiles, connectDevice, getOpenableFiles, getFileName, writeToFile, readFile
+from encryptor import encryptFileWithDevice, decryptFile
 import fileinput
 import sys
 
@@ -23,15 +23,7 @@ def resolveKeyEncryptMenu(menu, key, btManager):
     # for now just get the only connected device
     device = btManager.getDevice()
     print("[MENU] Got device")
-    symmetric_key = generateSymmKey()
-    print("[MENU] Generated symmetric key")
-    digest, nonce = encryptFile(filename, symmetric_key)
-    print("[MENU] Encrypted file with symmetric key")
-    encryptMetadata(filename, symmetric_key, digest, nonce, device.getPukFilename())
-    print("[MENU] Encrypted metadata file with device PUK")
-    # trash symmetric_key variable
-    del symmetric_key
-    print("[MENU] Deleted symmetric key")
+    encryptFileWithDevice(filename, device)
     writeToFile(LINKEDFILES, device.addr + "|" + filename + "|E" + "\n", "a")
     print("[MENU] Added file link to databases")
     print("[MENU] File encrypted with device")

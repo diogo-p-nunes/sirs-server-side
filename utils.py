@@ -2,10 +2,6 @@ import hashlib
 import subprocess
 import os
 from constants import *
-import datetime
-from Crypto.PublicKey import RSA
-from Crypto.Signature import pkcs1_15
-from Crypto.Hash import SHA256
 
 
 def writeToFile(filename, data, mode):
@@ -63,33 +59,8 @@ def getOpenableFiles(btManager):
     return lista
 
 
-# intermediate version
-def addTimestamp(m):
-    print("+ timestamp")
-    timestamp = str(datetime.datetime.utcnow())
-    #if isinstance(m, (bytes, bytearray)):
-    #    #m = m + b'||' + timestamp.encode()
-    #    m = m
-    #else:
-    #    m = m + TSMP + timestamp
-    return m + TSMP + timestamp.encode()
-
-
-def addSignature(m,original):
-    print("+ signature")
-    return m+SIGN+messageSignature(original)
-
-
 def convertToBytes(m):
     if isinstance(m, (bytes, bytearray)):
         return m
     else:
         return m.encode()
-
-
-# intermediate version
-def messageSignature(original):
-    #priv = RSA.import_key(open("private_key.pem").read())
-    priv = RSA.importKey(open("CA_keys/private.key").read())
-    h = SHA256.new(original)
-    return pkcs1_15.new(priv).sign(h)

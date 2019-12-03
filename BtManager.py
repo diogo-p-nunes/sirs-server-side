@@ -1,6 +1,7 @@
 from bluetooth import PORT_ANY, BluetoothSocket, RFCOMM, advertise_service, SERIAL_PORT_CLASS, SERIAL_PORT_PROFILE
-from utils import *
+from utils import writeToFile
 from Device import Device
+from constants import *
 
 
 class BtManager:
@@ -24,7 +25,16 @@ class BtManager:
         device_socket, device_addr = self.server_socket.accept()
         print("[BT] Accepted connection from", device_addr[0])
 
-        # add just connected device to the list of connected devices
+        # add the just connected device to the list of connected devices
+
+        # first check if it had been connected before
+        for device in self.connected_devices:
+            if device.addr == device_addr[0]:
+                device.socket = device_socket
+                device.doneConfAssurance = False
+                return device
+
+        # if it had never been connected before
         device = Device(device_socket, device_addr[0])
         self.connected_devices.append(device)
         return device

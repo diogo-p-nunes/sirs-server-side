@@ -1,4 +1,7 @@
-from utils import *
+from utils import writeToFile, readFile, convertToBytes
+from encryptor import addTimestamp, addSignature
+from constants import *
+import os
 
 
 class Device:
@@ -6,6 +9,7 @@ class Device:
         self.socket = socket
         self.addr = addr
         self.puk_filename = puk_filename
+        self.doneConfAssurance = False
 
     def setPukFilename(self, puk_filename):
         self.puk_filename = puk_filename
@@ -39,10 +43,15 @@ class Device:
             return None
 
     def isConnected(self):
-        if self.addr is None and self.socket is None:
-            return False
-        else:
+        try:
+            self.socket.getpeername()
             return True
+        except:
+            self.socket = None
+            return False
+
+    def setDoneConfAssurance(self, value):
+        self.doneConfAssurance = value
 
     def getRegistrationEntry(self):
         return self.addr + "|" + self.getPukFilename()

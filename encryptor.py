@@ -1,10 +1,14 @@
-from Crypto.Cipher import AES, PKCS1_v1_5
-from Crypto.PublicKey import RSA
+from Crypto.Cipher import AES
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Random import get_random_bytes
+import datetime
+from Crypto.PublicKey import RSA
+from Crypto.Signature import pkcs1_15
+from Crypto.Hash import SHA256
 import os
-from utils import *
+from utils import writeToFile, readFile
 from constants import *
+from time import sleep
 
 
 def encryptFile(filename, symmetric_key):
@@ -44,3 +48,75 @@ def encryptMetadata(filename, symmetric_key, digest, nonce, pukFile):
     metadataFile = base + "/metadata." + parts[-1]
     print("[ENC] Created metadata file")
     writeToFile(metadataFile, ciphertext, "wb")
+
+
+def encryptFileWithDevice(filename, device):
+    symmetric_key = generateSymmKey()
+    print("[MENU] Generated symmetric key")
+    digest, nonce = encryptFile(filename, symmetric_key)
+    print("[MENU] Encrypted file with symmetric key")
+    encryptMetadata(filename, symmetric_key, digest, nonce, device.getPukFilename())
+    print("[MENU] Encrypted metadata file with device PUK")
+    # trash symmetric_key variable
+    del symmetric_key
+    print("[MENU] Deleted symmetric key")
+
+
+# intermediate version
+def addTimestamp(m):
+    print("+ timestamp")
+    timestamp = str(datetime.datetime.utcnow())
+    #if isinstance(m, (bytes, bytearray)):
+    #    #m = m + b'||' + timestamp.encode()
+    #    m = m
+    #else:
+    #    m = m + TSMP + timestamp
+    return m + TSMP + timestamp.encode()
+
+
+# intermediate version
+def addSignature(m,original):
+    print("+ signature")
+    return m+SIGN+messageSignature(original)
+
+
+# intermediate version
+def messageSignature(original):
+    #priv = RSA.import_key(open("private_key.pem").read())
+    priv = RSA.importKey(open("CA_keys/private.key").read())
+    h = SHA256.new(original)
+    return pkcs1_15.new(priv).sign(h)
+
+
+# advanced version
+def threadedCheckIfDisconnected(btManager, run_event):
+    while run_event.is_set():
+        devices = btManager.connected_devices
+        #if len(devices) == 0:
+        #    print("[CONFASS] No devices connected.")
+        confAssurance(devices)
+        sleep(5)
+
+
+
+def confAssurance(devices):
+    for device in devices:
+        if not device.isConnected() and not device.doneConfAssurance:
+            print("[CONFASS] Device %s disconnected." % device.addr)
+            print("[CONFASS] Performing Conf-Assurance.")
+
+            # check if file was decrypted by the device in this session
+            lines = readFile(LINKEDFILES, 'r')
+            newlines = []
+            for line in lines:
+                l_addr, l_filename, l_ebit = line.replace('\n', '').split('|')
+                if l_addr == device.addr and l_ebit == 'D':
+                    # encrypt file again
+                    print("[CONFASS] Encrypting file:", l_filename, end='')
+                    encryptFileWithDevice(l_filename, device)
+                    line = line.replace('|D', '|E')
+                    print(" ... done.")
+                newlines.append(line)
+
+            writeToFile(LINKEDFILES, ''.join(newlines), 'w')
+            device.setDoneConfAssurance(True)
