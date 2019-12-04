@@ -4,6 +4,7 @@ from Crypto.Signature import pkcs1_15
 from Crypto.Hash import SHA256
 import ast
 import base64
+import os
 
 def encrypt_private_key(a_message, private_key):
     encryptor = PKCS1_OAEP.new(private_key)
@@ -21,8 +22,9 @@ def decrypt_public_key(encoded_encrypted_msg, public_key):
     print(decoded_decrypted_msg)
     return decoded_decrypted_msg
 
-
-
+meta = os.stat("server-file-system/metadata.file1.txt")
+print(meta.st_size)
+"""
 
 #*****************
 priv = RSA.importKey(open("CA_keys/private.key","r").read())
@@ -35,4 +37,4 @@ m = b"potato"
 encrypted = encrypt_private_key(m,priv)
 decrypted = decrypt_public_key(encrypted, pub)
 print(decrypted)
-
+"""

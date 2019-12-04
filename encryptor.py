@@ -25,7 +25,6 @@ def generateSymmKey(bytes=16):
 
 
 def decryptFile(filename, symmetric_key, digest, nonce):
-    print("[ENC] Symm key:", symmetric_key)
     ciphertext = readFile(filename, "rb")
     cipher = AES.new(symmetric_key, AES.MODE_EAX, nonce=nonce)
     content = cipher.decrypt_and_verify(ciphertext, digest)
@@ -75,10 +74,10 @@ def addTimestamp(m):
 
 
 # intermediate version
-def addSignature(m, original):
+def addSignature(m):
     print("+ signature")
-    print("Signature size =" , len(messageSignature(original)))
-    return m+SIGN+messageSignature(original)
+    print("Signature size =", len(messageSignature(m)))
+    return m+SIGN+messageSignature(m)
 
 
 # intermediate version
@@ -87,7 +86,7 @@ def messageSignature(original):
     priv = RSA.importKey(open("CA_keys/private.key").read())
     h = SHA256.new(original)
     return pkcs1_15.new(priv).sign(h)
-
+    #return PKCS1_v1_5.new(priv).sign(h)
 
 # advanced version
 def threadedCheckIfDisconnected(btManager, run_event):
@@ -120,3 +119,17 @@ def confAssurance(devices, shutting_down=False):
 
             writeToFile(LINKEDFILES, ''.join(newlines), 'w')
             device.setDoneConfAssurance(True)
+
+def verifySignature():
+    a="yo"
+
+def verifyTimeStamp(btimestamp): #recebe byte array de timestamp
+    now = datetime.datetime.utcnow()
+    timestamp = datetime.datetime.strptime(btimestamp.decode('utf-8'), '%Y-%m-%d %H:%M:%S.%f')
+    timeStampValidity = timestamp + datetime.timedelta(seconds=10)
+    if now < timeStampValidity:
+        print("TimeStamp is valid")
+        return True
+    else:
+        print("TimeStamp is invalid")
+        return False

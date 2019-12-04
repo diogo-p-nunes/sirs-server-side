@@ -1,5 +1,5 @@
 # message splitters and concatenators
-CNT = b'||'
+CNT = b'|S|'
 TSMP = b'|X|'
 SIGN = b'|X|'
 
