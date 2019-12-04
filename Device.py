@@ -39,8 +39,14 @@ class Device:
                 print("[DEVICE] Error: Timestamp is invalid.")
                 return None
             print("[DEVICE] Timestamp is valid.")
+            
+            if not isPUK:
+                success_sign = verifySignature(bcontent+TSMP+btimestamp, 
+                                                bsignature, 
+                                                self.getPukFilename())
+            else:
+                success_sign = True
 
-            success_sign = verifySignature(bsignature)
             if not success_sign:
                 print("[DEVICE] Error: Signature is invalid.")
                 return None

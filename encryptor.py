@@ -112,8 +112,16 @@ def confAssurance(devices, shutting_down=False):
 
 
 # intermediate version
-def verifySignature(bsign):
-    return True
+def verifySignature(original, bsign, puk_filename):
+    key = RSA.import_key(open(puk_filename).read())
+    h = SHA256.new(original)
+    try:
+        pkcs1_15.new(key).verify(h, bsign)
+        print("The signature is valid.")
+        return True
+    except (ValueError, TypeError):
+        print("The signature is not valid.")
+        return False
 
 
 # intermediate version
