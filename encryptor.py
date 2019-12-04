@@ -63,41 +63,31 @@ def encryptFileWithDevice(filename, device):
 
 # intermediate version
 def addTimestamp(m):
-    print("+ timestamp")
     timestamp = str(datetime.datetime.utcnow())
-    #if isinstance(m, (bytes, bytearray)):
-    #    #m = m + b'||' + timestamp.encode()
-    #    m = m
-    #else:
-    #    m = m + TSMP + timestamp
     return m + TSMP + timestamp.encode()
 
 
 # intermediate version
 def addSignature(m):
-    print("+ signature")
-    print("Signature size =", len(messageSignature(m)))
-    return m+SIGN+messageSignature(m)
+    return m + SIGN + messageSignature(m)
 
 
 # intermediate version
 def messageSignature(original):
-    #priv = RSA.import_key(open("private_key.pem").read())
     priv = RSA.importKey(open("CA_keys/private.key").read())
     h = SHA256.new(original)
     return pkcs1_15.new(priv).sign(h)
-    #return PKCS1_v1_5.new(priv).sign(h)
+
 
 # advanced version
 def threadedCheckIfDisconnected(btManager, run_event):
     while run_event.is_set():
         devices = btManager.connected_devices
-        #if len(devices) == 0:
-        #    print("[CONFASS] No devices connected.")
         confAssurance(devices)
         sleep(5)
 
 
+# advanced version
 def confAssurance(devices, shutting_down=False):
     for device in devices:
         if (not device.isConnected() and not device.doneConfAssurance) or shutting_down:
@@ -120,16 +110,18 @@ def confAssurance(devices, shutting_down=False):
             writeToFile(LINKEDFILES, ''.join(newlines), 'w')
             device.setDoneConfAssurance(True)
 
-def verifySignature():
-    a="yo"
 
+# intermediate version
+def verifySignature(bsign):
+    return True
+
+
+# intermediate version
 def verifyTimeStamp(btimestamp): #recebe byte array de timestamp
     now = datetime.datetime.utcnow()
-    timestamp = datetime.datetime.strptime(btimestamp.decode('utf-8'), '%Y-%m-%d %H:%M:%S.%f')
+    timestamp = datetime.datetime.strptime(btimestamp.decode('utf-8'), '%Y-%m-%d %H:%M:%S')
     timeStampValidity = timestamp + datetime.timedelta(seconds=10)
     if now < timeStampValidity:
-        print("TimeStamp is valid")
         return True
     else:
-        print("TimeStamp is invalid")
         return False

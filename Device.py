@@ -1,5 +1,5 @@
-from utils import writeToFile, readFile, convertToBytes
-from encryptor import addTimestamp, addSignature
+from utils import writeToFile, readFile, convertToBytes, splitMessage
+from encryptor import addTimestamp, addSignature, verifySignature, verifyTimeStamp
 from constants import *
 import os
 
@@ -20,26 +20,35 @@ class Device:
         else:
             # ask data from android
             print("[DEVICE] Requesting PUK to Android")
-            try:
-                data = self.socket.recv(1076)
-                if len(data) == 0:
-                    return None
-            except IOError:
-                print("[DEVICE] Error: Puk not received")
-                return None
+            data = self.readMessage(731, isPUK=True)
             name = PUKDIR + "/" + self.addr.replace(':', '') + ".pem"
             writeToFile(name, data, 'wb')
             self.setPukFilename(name)
             return self.getPukFilename()
 
-    def readMessage(self, size):
+    def readMessage(self, size, isPUK=False, isMetadata=False):
         try:
             data = self.socket.recv(size)
             if len(data) == 0:
                 return None
-            return data
+            print(len(data))
+            bcontent, btimestamp, bsignature = splitMessage(data, isPUK=isPUK, 
+                                                                  isMetadata=isMetadata)
+            success_ts = verifyTimeStamp(btimestamp)
+            if not success_ts:
+                print("[DEVICE] Error: Timestamp is invalid.")
+                return None
+            print("[DEVICE] Timestamp is valid.")
+
+            success_sign = verifySignature(bsignature)
+            if not success_sign:
+                print("[DEVICE] Error: Signature is invalid.")
+                return None
+            print("[DEVICE] Signature is valid.")
+
+            return bcontent
         except IOError:
-            print("[DEVICE] Error: Message not received")
+            print("[DEVICE] Error: Message not received.")
             return None
 
     def isConnected(self):
@@ -60,18 +69,17 @@ class Device:
         m = convertToBytes(m)
         m = addTimestamp(m)
         m = addSignature(m)
-
         self.socket.send(m)
 
     def requestMetadataContent(self, filename):
         print("[DEVICE] Requesting metadata content")
         self.sendMessage("RE")
-        answer = self.readMessage(2).decode("utf-8")
+        answer = self.readMessage(285).decode("utf-8")
         metafile = FILE_SYSTEM + "metadata." + filename.split("/")[-1]
         if answer == "OK":
             print("[DEVICE] Sending metadata")
             self.sendMessage(readFile(metafile, "rb"))
-            content = self.readMessage(120)
+            content = self.readMessage(334, isMetadata=True)
             print("[DEVICE] Got metadata content")
             print("[DEVICE] Metadata content received:", content)
             # returns list = [symmetric-key, digest, nonce]

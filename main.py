@@ -10,7 +10,11 @@ from encryptor import threadedCheckIfDisconnected, confAssurance
 Main function
 
 Description:
-Write something here
+Displays a cycle of menus directed by the users choices.
+Additionaly, launch a thread that in parallel from time to time 
+checks if there are any devices that were connected during this session
+and for some reason disconnected. This is done so the Conf-Assurance protocol
+may be performed when a device disconnects.
 """
 if __name__ == "__main__":
     try:
