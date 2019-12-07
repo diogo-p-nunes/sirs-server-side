@@ -23,11 +23,16 @@ def resolveKeyEncryptMenu(menu, key, btManager):
     # for now just get the only connected device
     device = btManager.getDevice()
     print("[MENU] Got device")
-    encryptFileWithDevice(filename, device)
-    writeToFile(LINKEDFILES, device.addr + "|" + filename + "|E" + "\n", "a")
-    print("[MENU] Added file link to databases")
-    print("[MENU] File encrypted with device")
-    menu.setOptions(getEncryptableFiles(btManager))
+    if device.isConnected():
+        encryptFileWithDevice(filename, device)
+        writeToFile(LINKEDFILES, device.addr + "|" + filename + "|E" + "\n", "a")
+        print("[MENU] Added file link to databases")
+        print("[MENU] File encrypted with device")
+        menu.setOptions(getEncryptableFiles(btManager))
+    else:
+        print("[MENU] Device is not connected")
+        menu = Menu(INIT_MENU, options=INIT_MENU_OPTIONS, add_return=False, resolve_key_function=resolveKeyInitMenu)
+
     return menu
 
 

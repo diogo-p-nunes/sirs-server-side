@@ -50,15 +50,22 @@ def encryptMetadata(filename, symmetric_key, digest, nonce, pukFile):
 
 
 def encryptFileWithDevice(filename, device):
-    symmetric_key = generateSymmKey()
-    print("[MENU] Generated symmetric key")
-    digest, nonce = encryptFile(filename, symmetric_key)
-    print("[MENU] Encrypted file with symmetric key")
-    encryptMetadata(filename, symmetric_key, digest, nonce, device.getPukFilename())
-    print("[MENU] Encrypted metadata file with device PUK")
-    # trash symmetric_key variable
-    del symmetric_key
-    print("[MENU] Deleted symmetric key")
+
+    if device.isConnected() :
+        print("[encryptFileWithDevice] Device is connected")
+        symmetric_key = generateSymmKey()
+        print("[MENU] Generated symmetric key")
+        digest, nonce = encryptFile(filename, symmetric_key)
+        print("[MENU] Encrypted file with symmetric key")
+        encryptMetadata(filename, symmetric_key, digest, nonce, device.getPukFilename())
+        print("[MENU] Encrypted metadata file with device PUK")
+        # trash symmetric_key variable
+        del symmetric_key
+        print("[MENU] Deleted symmetric key")
+    else:
+        print("[encryptFileWithDevice] Device NOT connected")
+
+
 
 
 # intermediate version
