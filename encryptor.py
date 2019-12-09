@@ -128,6 +128,7 @@ def confAssurance(devices, shutting_down=False):
 
             writeToFile(LINKEDFILES, ''.join(newlines), 'w')
             device.setDoneConfAssurance(True)
+            devices.remove(device)
 
 
 # intermediate version
