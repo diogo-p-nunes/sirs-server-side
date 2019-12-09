@@ -4,6 +4,7 @@ from utils import getEncryptableFiles, connectDevice, getOpenableFiles, getFileN
 from encryptor import encryptFileWithDevice, decryptFile
 import fileinput
 import sys
+import os
 
 
 def resolveKeyInitMenu(menu, key, btManager):
@@ -74,8 +75,16 @@ def resolveKeyOpenFileMenu(menu, key, btManager):
                 if l_addr == device.addr and l_filename == filename and l_ebit.startswith('E'):
                     line = line.replace('|E', '|D')
                     changed_bit = True
+                
                 if (not changed_bit) or (changed_bit and not unlink):
                     newlines.append(line)
+                
+                if changed_bit and unlink:
+                    basefile = l_filename.split("/")[-1]
+                    meta_basefile = "metadata." + basefile
+                    metadata_name = "/".join(l_filename.split("/")[:-1]) + "/" + meta_basefile
+                    os.remove(metadata_name) 
+
                 changed_bit = False
 
 
