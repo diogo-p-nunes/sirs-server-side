@@ -48,7 +48,7 @@ def encryptMetadata(filename, symmetric_key, digest, nonce, pukFile):
     print("[ENC] Created metadata file")
     writeToFile(metadataFile, ciphertext, "wb")
 
-
+# advanced
 def encryptMetadataWithSymmetric(filename, symmetric_key, digest_file, nonce_file, share_key):
     # content from the share file that was encrypted
     content = symmetric_key + CNT + digest_file + CNT + nonce_file
@@ -78,7 +78,7 @@ def encryptFileWithDevice(filename, device):
     print("[MENU] Deleted symmetric key")
 
 
-#advanced version
+# advanced version
 def encryptFileWithManyDevices(filename, devices, share_key):
     symmetric_key = generateSymmKey()
     print("[MENU] Generated symmetric key")

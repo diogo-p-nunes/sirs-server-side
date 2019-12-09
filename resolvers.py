@@ -26,29 +26,44 @@ def resolveKeyInitMenu(menu, key, btManager):
             return Menu(SHARE_FILE_MENU, options=getOpenableFiles(btManager), resolve_key_function=resolveKeyShareFileMenu)                 
 
 
+
+
 def resolveKeyShareFileMenu(menu, key, btManager):
     # show sub-menu asking what files to share with which devices
     active_device = btManager.active_device
     submenu = Menu(DEVICES_MENU, options=btManager.getAllDevicesIDExcept(active_device), add_return=False, resolve_key_function=resolveShareDeviceMenu)
     list_keys = submenu.show(multiple=True)
     share_devices = submenu.resolveKey(list_keys, btManager)
+
+    # devices to send the share_key after encryption of metadata
     share_devices.append(active_device)
 
+    # file to encrypt
     filename = getFileName(key, getEncryptableFiles(btManager))
+
     if active_device.isConnected():
+        # key to encrypt metadata which all share_devices can open with this key
         share_key = generateSymmKey()
+
+        # simulate each file encrypting the filename to register all in the LINK database
         digest_metadata, nonce_metadata = encryptFileWithManyDevices(filename, share_devices, share_key)
+
         for d in share_devices:
+            # for each device, send share_key, digest and nonce of metadata encryption with share_key
+            # they need these last two items to decrypt the metadata later
             sendShareKey(share_key, digest_metadata, nonce_metadata, d.getPukFilename(), d)       
 
         del share_key
         print("[MENU] Deleted share key")
-        #menu.setOptions(getEncryptableFiles(btManager))
+        
     else:
         print("[MENU] Device is not connected")
         menu = Menu(INIT_MENU, options=INIT_MENU_OPTIONS, add_return=False, resolve_key_function=resolveKeyInitMenu)
 
     return menu
+
+
+
 
 def resolveKeyEncryptMenu(menu, key, btManager):
     filename = getFileName(key, getEncryptableFiles(btManager))
