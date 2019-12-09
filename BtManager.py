@@ -8,6 +8,7 @@ class BtManager:
     def __init__(self):
         self.server_socket = None
         self.connected_devices = []
+        self.active_device = None
 
     def connect(self, uuid="5f1ddff1-ea2f-49c6-8ec8-3b53306f4f88"):
         # only create server socket once
@@ -67,3 +68,6 @@ class BtManager:
             return self.connected_devices[-1]
         else:
             return None
+
+    def getAllDevicesID(self):
+        return [d.addr for d in self.connected_devices]

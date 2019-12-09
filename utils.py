@@ -33,12 +33,15 @@ def getFileName(key, filelist):
     return os.getcwd() + "/" + FILE_SYSTEM + filelist[key]
 
 
-def getEncryptableFiles(btManager):
+def checkDeviceConnected(btManager):
     if not btManager.hasConnectedDevices():
         print("[MENU] No device connected :(")
-        return None
+        return False
+    else:
+        return True
+
+def getEncryptableFiles(btManager):
     lista = [file for file in sorted(os.listdir(FILE_SYSTEM)) if not file.startswith("metadata")]
-    device = btManager.getDevice()
     for line in readFile(LINKEDFILES):
         # remove every file that is not public
         parts = line.split("|")
@@ -47,11 +50,8 @@ def getEncryptableFiles(btManager):
 
 
 def getOpenableFiles(btManager):
-    if not btManager.hasConnectedDevices():
-        print("[MENU] No device connected :(")
-        return None
     lista = [file for file in sorted(os.listdir(FILE_SYSTEM)) if not file.startswith("metadata")]
-    device = btManager.getDevice()
+    device = btManager.active_device
     for line in readFile(LINKEDFILES):
         parts = line.split("|")
         if parts[0] != device.addr:

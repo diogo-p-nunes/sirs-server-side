@@ -1,6 +1,6 @@
 from Menu import Menu
 from constants import *
-from utils import getEncryptableFiles, connectDevice, getOpenableFiles, getFileName, writeToFile, readFile
+from utils import checkDeviceConnected, getEncryptableFiles, connectDevice, getOpenableFiles, getFileName, writeToFile, readFile
 from encryptor import encryptFileWithDevice, decryptFile
 import fileinput
 import sys
@@ -12,18 +12,24 @@ def resolveKeyInitMenu(menu, key, btManager):
         connectDevice(btManager)
         return menu
     elif key == 1:
+        success = checkDeviceConnected(btManager)
+        if not success:
+            return menu
+        getDevice(btManager)
         return Menu(ENCRYPT_FILE_WITH_DEVICE_MENU, options=getEncryptableFiles(btManager),
                     resolve_key_function=resolveKeyEncryptMenu)
     elif key == 2:
+        success = checkDeviceConnected(btManager)
+        if not success:
+            return menu
+        getDevice(btManager)
         return Menu(OPEN_FILE_MENU, options=getOpenableFiles(btManager), resolve_key_function=resolveKeyOpenFileMenu)
+
 
 
 def resolveKeyEncryptMenu(menu, key, btManager):
     filename = getFileName(key, getEncryptableFiles(btManager))
-    # show list of user devices to select from once we implement multiple devices
-    # for now just get the only connected device
-    device = btManager.getDevice()
-    #print("[MENU] Got device")
+    device = btManager.active_device
     if device.isConnected():
         encryptFileWithDevice(filename, device)
         writeToFile(LINKEDFILES, device.addr + "|" + filename + "|E" + "\n", "a")
@@ -39,9 +45,7 @@ def resolveKeyEncryptMenu(menu, key, btManager):
 
 def resolveKeyOpenFileMenu(menu, key, btManager):
     filename = getFileName(key, getOpenableFiles(btManager))
-    # show list of user devices to select from once we implement multiple devices
-    # for now just get the only connected device
-    device = btManager.getDevice()
+    device = btManager.active_device
     
     # show sub-menu asking if user wants to unlink forever or not
     submenu = Menu(UNLINK_FOR_EVER_MENU, options=UNLINK_FOR_EVER_MENU_OPTIONS, add_return=False, resolve_key_function=resolveUnlinkSubMenu)
@@ -97,8 +101,19 @@ def resolveKeyOpenFileMenu(menu, key, btManager):
     return menu
 
 
-
+# basic
 def resolveUnlinkSubMenu(menu, key, btManager):
     # means to unlink
     return key == 1
 
+
+# advanced version
+def getDevice(btManager):
+    # show sub-menu asking which device to use
+    submenu = Menu(DEVICES_MENU, options=btManager.getAllDevicesID(), add_return=False, resolve_key_function=resolveDeviceMenu)
+    key = submenu.show()
+    btManager.active_device = submenu.resolveKey(key, btManager)
+
+
+def resolveDeviceMenu(menu, key, btManager):
+    return btManager.connected_devices[key]
