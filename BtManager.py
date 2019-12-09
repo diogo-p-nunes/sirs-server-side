@@ -42,7 +42,18 @@ class BtManager:
 
     def hasConnectedDevices(self):
         # if at least one device is connected returns true else false
-        return len(self.connected_devices) > 0
+        return len(self.connected_devices) > 0 
+
+    def connectedDevices(self, key):
+        return self.connected_devices[key]
+
+    def connectedDevicesExceptGetIndexs(self, active_device, keys):
+        all_devices_except = [d for d in self.connected_devices if d.addr != active_device.addr]
+        r = []
+        for k in keys:
+            r.append(all_devices_except[k])
+        return r
+
 
     def isDeviceRegistered(self, device):
         with open(REGISTERED_DEVICES, 'r') as f:
@@ -71,3 +82,6 @@ class BtManager:
 
     def getAllDevicesID(self):
         return [d.addr for d in self.connected_devices]
+
+    def getAllDevicesIDExcept(self, active_device):
+        return [d.addr for d in self.connected_devices if d.addr != active_device.addr]

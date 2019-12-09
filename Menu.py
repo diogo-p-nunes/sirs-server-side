@@ -8,7 +8,7 @@ class Menu:
         self.addReturn = add_return
         self.resolve_key_function = resolve_key_function
 
-    def show(self):
+    def show(self, multiple=False):
         # display menu information and options if any
         print("\n\n" + self.text)
         if self.addReturn:
@@ -19,18 +19,34 @@ class Menu:
         print("=" * len(self.text.split("\n")[0]))
         # get user answer - if invalid display again
         invalid = True
-        answer = None
+        answer = []
         while invalid:
-            answer = eval((input("Enter choice: ")))
-            if answer != -1 and self.options is None:
-                invalid = True
-                print(INVALID_OPTION)
-            elif self.addReturn and answer == -1:
-                invalid = False
-            elif answer in range(len(self.options)):
-                invalid = False
+            if not multiple:
+                answer = eval((input("Enter choice: ")))
+                if answer != -1 and self.options is None:
+                    invalid = True
+                    print(INVALID_OPTION)
+                elif self.addReturn and answer == -1:
+                    invalid = False
+                elif answer in range(len(self.options)):
+                    invalid = False
+                else:
+                    print(INVALID_OPTION)
             else:
-                print(INVALID_OPTION)
+                answer = []
+                valueslist = input("Enter devices separated by space: ")
+                values = valueslist.split(" ") 
+                print("values: ", values)
+                for i in values:
+                    item = eval(i)                       
+                    if item in range(len(self.options)):
+                        answer.append(item)
+                        invalid = False
+                    else:
+                        invalid = True
+                        print(INVALID_OPTION)
+                        break
+                
         # return user answer
         return answer
 

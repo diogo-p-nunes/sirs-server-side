@@ -1,7 +1,7 @@
 from Menu import Menu
 from constants import *
 from utils import checkDeviceConnected, getEncryptableFiles, connectDevice, getOpenableFiles, getFileName, writeToFile, readFile
-from encryptor import encryptFileWithDevice, decryptFile
+from encryptor import encryptFileWithDevice, decryptFile, generateSymmKey, encryptFileWithManyDevices, sendShareKey
 import fileinput
 import sys
 import os
@@ -11,21 +11,44 @@ def resolveKeyInitMenu(menu, key, btManager):
     if key == 0:
         connectDevice(btManager)
         return menu
-    elif key == 1:
+    
+    else:
         success = checkDeviceConnected(btManager)
         if not success:
             return menu
         getDevice(btManager)
-        return Menu(ENCRYPT_FILE_WITH_DEVICE_MENU, options=getEncryptableFiles(btManager),
-                    resolve_key_function=resolveKeyEncryptMenu)
-    elif key == 2:
-        success = checkDeviceConnected(btManager)
-        if not success:
-            return menu
-        getDevice(btManager)
-        return Menu(OPEN_FILE_MENU, options=getOpenableFiles(btManager), resolve_key_function=resolveKeyOpenFileMenu)
+        if key == 1:
+            return Menu(ENCRYPT_FILE_WITH_DEVICE_MENU, options=getEncryptableFiles(btManager),
+                        resolve_key_function=resolveKeyEncryptMenu)
+        elif key == 2:
+            return Menu(OPEN_FILE_MENU, options=getOpenableFiles(btManager), resolve_key_function=resolveKeyOpenFileMenu)
+        elif key == 3:
+            return Menu(SHARE_FILE_MENU, options=getOpenableFiles(btManager), resolve_key_function=resolveKeyShareFileMenu)                 
 
 
+def resolveKeyShareFileMenu(menu, key, btManager):
+    # show sub-menu asking what files to share with which devices
+    active_device = btManager.active_device
+    submenu = Menu(DEVICES_MENU, options=btManager.getAllDevicesIDExcept(active_device), add_return=False, resolve_key_function=resolveShareDeviceMenu)
+    list_keys = submenu.show(multiple=True)
+    share_devices = submenu.resolveKey(list_keys, btManager)
+    share_devices.append(active_device)
+
+    filename = getFileName(key, getEncryptableFiles(btManager))
+    if active_device.isConnected():
+        share_key = generateSymmKey()
+        digest_metadata, nonce_metadata = encryptFileWithManyDevices(filename, share_devices, share_key)
+        for d in share_devices:
+            sendShareKey(share_key, digest_metadata, nonce_metadata, d.getPukFilename(), d)       
+
+        del share_key
+        print("[MENU] Deleted share key")
+        #menu.setOptions(getEncryptableFiles(btManager))
+    else:
+        print("[MENU] Device is not connected")
+        menu = Menu(INIT_MENU, options=INIT_MENU_OPTIONS, add_return=False, resolve_key_function=resolveKeyInitMenu)
+
+    return menu
 
 def resolveKeyEncryptMenu(menu, key, btManager):
     filename = getFileName(key, getEncryptableFiles(btManager))
@@ -115,5 +138,8 @@ def getDevice(btManager):
     btManager.active_device = submenu.resolveKey(key, btManager)
 
 
+def resolveShareDeviceMenu(menu, key, btManager):
+    return btManager.connectedDevicesExceptGetIndexs(btManager.active_device, key)
+
 def resolveDeviceMenu(menu, key, btManager):
-    return btManager.connected_devices[key]
+    return btManager.connectedDevices(key)

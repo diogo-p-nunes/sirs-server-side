@@ -49,24 +49,24 @@ def encryptMetadata(filename, symmetric_key, digest, nonce, pukFile):
     writeToFile(metadataFile, ciphertext, "wb")
 
 
+def encryptMetadataWithSymmetric(filename, symmetric_key, digest_file, nonce_file, share_key):
+    # content from the share file that was encrypted
+    content = symmetric_key + CNT + digest_file + CNT + nonce_file
+    print("[ENC] Metadata content to encrypt:", content)
+
+    nonce = get_random_bytes(15)
+    cipher = AES.new(share_key, AES.MODE_EAX, nonce=nonce)
+    ciphertext, digest = cipher.encrypt_and_digest(content)
+
+    parts = filename.split("/")
+    base = '/'.join(parts[:-1])
+    metadataFile = base + "/metadata." + parts[-1]
+    print("[ENC] Created metadata file")
+    writeToFile(metadataFile, ciphertext, "wb")
+    return digest, nonce
+
+
 def encryptFileWithDevice(filename, device):
-    '''
-    if device.isConnected() or confass:
-        print("[encryptFileWithDevice] Device is connected")
-        symmetric_key = generateSymmKey()
-        print("[MENU] Generated symmetric key")
-        digest, nonce = encryptFile(filename, symmetric_key)
-        print("[MENU] Encrypted file with symmetric key")
-        encryptMetadata(filename, symmetric_key, digest, nonce, device.getPukFilename())
-        print("[MENU] Encrypted metadata file with device PUK")
-        # trash symmetric_key variable
-        del symmetric_key
-        print("[MENU] Deleted symmetric key")
-        return True
-    else:
-        print("[encryptFileWithDevice] Device NOT connected")
-        return False
-    '''
     symmetric_key = generateSymmKey()
     print("[MENU] Generated symmetric key")
     digest, nonce = encryptFile(filename, symmetric_key)
@@ -78,6 +78,20 @@ def encryptFileWithDevice(filename, device):
     print("[MENU] Deleted symmetric key")
 
 
+#advanced version
+def encryptFileWithManyDevices(filename, devices, share_key):
+    symmetric_key = generateSymmKey()
+    print("[MENU] Generated symmetric key")
+    digest_file, nonce_file = encryptFile(filename, symmetric_key)
+    print("[MENU] Encrypted file with share key")
+    digest_metadata, nonce_metadata = encryptMetadataWithSymmetric(filename, share_key, digest_file, nonce_file, share_key)
+    print("[MENU] Encrypted metadata file with device ShareKey") 
+    for d in devices:     
+        writeToFile(LINKEDFILES, d.addr + "|" + filename + "|E" + "\n", "a")
+    # trash symmetric_key variable
+    del symmetric_key
+    print("[MENU] Deleted symmetric key")
+    return digest_metadata, nonce_metadata
 
 # intermediate version
 def addTimestamp(m):
@@ -153,3 +167,15 @@ def verifyTimeStamp(btimestamp): #recebe byte array de timestamp
         return True
     else:
         return False
+
+#advanced version
+def sendShareKey(share_key, digest_metadata, nonce_metadata, pukFile, device):
+    device.sendMessage("RS")
+    puk = RSA.import_key(open(pukFile).read())
+    cipher_rsa = PKCS1_OAEP.new(puk)
+    content = share_key + CNT + digest_metadata + CNT + nonce_metadata
+    print("[ENC] Encrypting sharekey+digest+nonce for metadata of shared file:", content)
+    ciphertext = cipher_rsa.encrypt(content)
+    print("[ENC] Done encrypting share metadata")
+    print("[ENC] Sending share metadata")
+    device.sendMessage(ciphertext)
