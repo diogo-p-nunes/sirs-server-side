@@ -13,7 +13,7 @@ rm -f databases/*
 touch databases/filedevicelinks.txt databases/registereddevices.txt
 
 # create random files with random content for testing
-echo "file" > server-file-system/file1.txt
-echo "file" > server-file-system/file2.txt
-echo "file" > server-file-system/file3.txt
-echo "file" > server-file-system/file4.txt
+echo "file0" > server-file-system/file0.txt
+echo "file1" > server-file-system/file1.txt
+echo "file2" > server-file-system/file2.txt
+echo "file3" > server-file-system/file3.txt

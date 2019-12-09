@@ -36,9 +36,15 @@ class Menu:
                 answer = []
                 valueslist = input("Enter devices separated by space: ")
                 values = valueslist.split(" ") 
-                print("values: ", values)
+                #print("values: ", values)
                 for i in values:
-                    item = eval(i)                       
+                    item = eval(i)
+
+                    # this is just for debugging with one device
+                    if item == -1:
+                        return []
+
+                    
                     if item in range(len(self.options)):
                         answer.append(item)
                         invalid = False

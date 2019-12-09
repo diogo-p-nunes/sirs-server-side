@@ -46,21 +46,20 @@ def resolveKeyShareFileMenu(menu, key, btManager):
         share_key = generateSymmKey()
 
         # simulate each file encrypting the filename to register all in the LINK database
-        digest_metadata, nonce_metadata = encryptFileWithManyDevices(filename, share_devices, share_key)
+        iv = encryptFileWithManyDevices(filename, share_devices, share_key)
 
         for d in share_devices:
             # for each device, send share_key, digest and nonce of metadata encryption with share_key
             # they need these last two items to decrypt the metadata later
-            sendShareKey(share_key, digest_metadata, nonce_metadata, d.getPukFilename(), d)       
+            sendShareKey(share_key, iv, d.getPukFilename(), d)       
 
         del share_key
         print("[MENU] Deleted share key")
         
     else:
         print("[MENU] Device is not connected")
-        menu = Menu(INIT_MENU, options=INIT_MENU_OPTIONS, add_return=False, resolve_key_function=resolveKeyInitMenu)
-
-    return menu
+        
+    return Menu(INIT_MENU, options=INIT_MENU_OPTIONS, add_return=False, resolve_key_function=resolveKeyInitMenu)
 
 
 
