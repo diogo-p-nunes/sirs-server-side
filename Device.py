@@ -31,7 +31,7 @@ class Device:
             data = self.socket.recv(size)
             if len(data) == 0:
                 return None
-            print(len(data))
+            #print(len(data))
             bcontent, btimestamp, bsignature = splitMessage(data, isPUK=isPUK, 
                                                                   isMetadata=isMetadata)
             success_ts = verifyTimeStamp(btimestamp)

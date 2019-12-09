@@ -50,8 +50,8 @@ def encryptMetadata(filename, symmetric_key, digest, nonce, pukFile):
 
 
 def encryptFileWithDevice(filename, device):
-
-    if device.isConnected() :
+    '''
+    if device.isConnected() or confass:
         print("[encryptFileWithDevice] Device is connected")
         symmetric_key = generateSymmKey()
         print("[MENU] Generated symmetric key")
@@ -62,9 +62,20 @@ def encryptFileWithDevice(filename, device):
         # trash symmetric_key variable
         del symmetric_key
         print("[MENU] Deleted symmetric key")
+        return True
     else:
         print("[encryptFileWithDevice] Device NOT connected")
-
+        return False
+    '''
+    symmetric_key = generateSymmKey()
+    print("[MENU] Generated symmetric key")
+    digest, nonce = encryptFile(filename, symmetric_key)
+    print("[MENU] Encrypted file with symmetric key")
+    encryptMetadata(filename, symmetric_key, digest, nonce, device.getPukFilename())
+    print("[MENU] Encrypted metadata file with device PUK")
+    # trash symmetric_key variable
+    del symmetric_key
+    print("[MENU] Deleted symmetric key")
 
 
 
@@ -112,6 +123,7 @@ def confAssurance(devices, shutting_down=False):
                     encryptFileWithDevice(l_filename, device)
                     line = line.replace('|D', '|E')
                     print("[CONFASS] File %s done." % l_filename)
+
                 newlines.append(line)
 
             writeToFile(LINKEDFILES, ''.join(newlines), 'w')

@@ -9,7 +9,7 @@ class BtManager:
         self.server_socket = None
         self.connected_devices = []
 
-    def connect(self, uuid="1e0ca4ea-299d-4335-93eb-27fcfe7fa848"):
+    def connect(self, uuid="5f1ddff1-ea2f-49c6-8ec8-3b53306f4f88"):
         # only create server socket once
         if self.server_socket is None:
             self.server_socket = BluetoothSocket(RFCOMM)

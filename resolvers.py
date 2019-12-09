@@ -22,7 +22,7 @@ def resolveKeyEncryptMenu(menu, key, btManager):
     # show list of user devices to select from once we implement multiple devices
     # for now just get the only connected device
     device = btManager.getDevice()
-    print("[MENU] Got device")
+    #print("[MENU] Got device")
     if device.isConnected():
         encryptFileWithDevice(filename, device)
         writeToFile(LINKEDFILES, device.addr + "|" + filename + "|E" + "\n", "a")
@@ -38,8 +38,15 @@ def resolveKeyEncryptMenu(menu, key, btManager):
 
 def resolveKeyOpenFileMenu(menu, key, btManager):
     filename = getFileName(key, getOpenableFiles(btManager))
+    # show list of user devices to select from once we implement multiple devices
+    # for now just get the only connected device
     device = btManager.getDevice()
-    print("[MENU] Got device")
+    
+    # show sub-menu asking if user wants to unlink forever or not
+    submenu = Menu(UNLINK_FOR_EVER_MENU, options=UNLINK_FOR_EVER_MENU_OPTIONS, add_return=False, resolve_key_function=resolveUnlinkSubMenu)
+    key = submenu.show()
+    unlink = submenu.resolveKey(key, btManager)
+    #print("UNLINK:", unlink)
 
     # check if file was already decrypted by the device
     lines = readFile(LINKEDFILES, 'r')
@@ -58,13 +65,19 @@ def resolveKeyOpenFileMenu(menu, key, btManager):
             print("[MENU] Post-decryption:", ' '.join(readFile(filename, "r")))
 
             # change the bit of encryption in the LINKEDFILES database so that we know that this file is decrypted
+            # or remove entry from database if unlink is true
             lines = readFile(LINKEDFILES, 'r')
             newlines = []
+            changed_bit = False
             for line in lines:
                 l_addr, l_filename, l_ebit = line.split('|')
                 if l_addr == device.addr and l_filename == filename and l_ebit.startswith('E'):
                     line = line.replace('|E', '|D')
-                newlines.append(line)
+                    changed_bit = True
+                if (not changed_bit) or (changed_bit and not unlink):
+                    newlines.append(line)
+                changed_bit = False
+
 
             writeToFile(LINKEDFILES, ''.join(newlines), 'w')
             print('[MENU] Changed LINKEDFILES encryption bit to: D')
@@ -73,3 +86,10 @@ def resolveKeyOpenFileMenu(menu, key, btManager):
     print("[MENU] File is public")
     print("[MENU] Content:", ' '.join(readFile(filename, "r")))
     return menu
+
+
+
+def resolveUnlinkSubMenu(menu, key, btManager):
+    # means to unlink
+    return key == 1
+

@@ -68,22 +68,22 @@ def convertToBytes(m):
 
 def splitMessage(m, isPUK=False, isMetadata=False):
     if isMetadata:
-        print("isMetadata")
+        #print("isMetadata")
         bcontent = m[:53]
         btimestamp = m[56:75]
         bsignature = m[78:]
     elif isPUK:
-        print("isPUK")
+        #print("isPUK")
         bcontent = m[:450]
         btimestamp = m[453:472]
         bsignature = m[475:]
     else:
-        print("isNormal")
+        #print("isNormal")
         bcontent = m[:2]
         btimestamp = m[5:24]
         bsignature = m[27:]
-    print(bcontent)
-    print(btimestamp)
-    print(bsignature)
+    #print(bcontent)
+    #print(btimestamp)
+    #print(bsignature)
     return (bcontent, btimestamp, bsignature)
 
