@@ -124,6 +124,8 @@ def confAssurance(devices, shutting_down=False):
             d.socket = None
     for device in devices:
         if (not device.isConnected() and not device.doneConfAssurance):
+            print("[CONFASS] Device %s disconnected." % device.addr)
+            print("[CONFASS] Performing Conf-Assurance.")
             for lf in allLinkedFiles:
                 l_addr, l_filename, l_ebit = lf.replace('\n', '').split('|')
                 if l_addr == device.addr and l_filename in private and l_ebit == 'D':

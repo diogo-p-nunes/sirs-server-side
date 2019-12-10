@@ -80,8 +80,8 @@ class BtManager:
         else:
             return None
 
-    def getAllDevicesID(self):
-        return [d.addr for d in self.connected_devices]
+    def getAllConnectedDevicesID(self):
+        return [d.addr for d in self.connected_devices if d.isConnected()]
 
-    def getAllDevicesIDExcept(self, active_device):
-        return [d.addr for d in self.connected_devices if d.addr != active_device.addr]        
+    def getAllConnectedDevicesIDExcept(self, active_device):
+        return [d.addr for d in self.connected_devices if d.addr != active_device.addr and d.isConnected()]        

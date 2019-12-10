@@ -31,7 +31,7 @@ def resolveKeyInitMenu(menu, key, btManager):
 def resolveKeyShareFileMenu(menu, key, btManager):
     # show sub-menu asking what files to share with which devices
     active_device = btManager.active_device
-    submenu = Menu(DEVICES_MENU, options=btManager.getAllDevicesIDExcept(active_device), add_return=False, resolve_key_function=resolveShareDeviceMenu)
+    submenu = Menu(DEVICES_MENU, options=btManager.getAllConnectedDevicesIDExcept(active_device), add_return=False, resolve_key_function=resolveShareDeviceMenu)
     list_keys = submenu.show(multiple=True)
     share_devices = submenu.resolveKey(list_keys, btManager)
 
@@ -138,7 +138,7 @@ def resolveUnlinkSubMenu(menu, key, btManager):
 # advanced version
 def getDevice(btManager):
     # show sub-menu asking which device to use
-    submenu = Menu(DEVICES_MENU, options=btManager.getAllDevicesID(), add_return=False, resolve_key_function=resolveDeviceMenu)
+    submenu = Menu(DEVICES_MENU, options=btManager.getAllConnectedDevicesID(), add_return=False, resolve_key_function=resolveDeviceMenu)
     key = submenu.show()
     btManager.active_device = submenu.resolveKey(key, btManager)
 
