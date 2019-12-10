@@ -1,7 +1,7 @@
 from Menu import Menu
 from constants import *
-from utils import checkDeviceConnected, getEncryptableFiles, connectDevice, getOpenableFiles, getFileName, writeToFile, readFile
-from encryptor import encryptFileWithDevice, decryptFile, generateSymmKey, encryptFileWithManyDevices, sendShareKey
+from utils import *
+from encryptor import *
 import fileinput
 import sys
 import os
@@ -41,22 +41,7 @@ def resolveKeyShareFileMenu(menu, key, btManager):
     # file to encrypt
     filename = getFileName(key, getEncryptableFiles(btManager))
 
-    if active_device.isConnected():
-        # key to encrypt metadata which all share_devices can open with this key
-        #share_key = generateSymmKey()
-        #print("[MENU] Share key:", share_key)
-
-        # simulate each file encrypting the filename to register all in the LINK database
-        #iv = encryptFileWithManyDevices(filename, share_devices, share_key)
-
-        #for d in share_devices:
-            # for each device, send share_key, digest and nonce of metadata encryption with share_key
-            # they need these last two items to decrypt the metadata later
-        #    sendShareKey(share_key, iv, d.getPukFilename(), d)       
-
-        #del share_key
-        #print("[MENU] Deleted share key")
-        
+    if active_device.isConnected():       
         encryptFileWithManyDevices(filename, share_devices)
         
     else:
@@ -118,7 +103,8 @@ def resolveKeyOpenFileMenu(menu, key, btManager):
             changed_bit = False
             for line in lines:
                 l_addr, l_filename, l_ebit = line.split('|')
-                if l_addr == device.addr and l_filename == filename and l_ebit.startswith('E'):
+                if l_filename == filename and l_ebit.startswith('E'):
+                # if l_addr == device.addr and l_filename == filename and l_ebit.startswith('E'):
                     line = line.replace('|E', '|D')
                     changed_bit = True
                 
@@ -127,7 +113,8 @@ def resolveKeyOpenFileMenu(menu, key, btManager):
                 
                 if changed_bit and unlink:
                     basefile = l_filename.split("/")[-1]
-                    meta_basefile = "metadata-" + (device.addr).replace(":","-") + "." + basefile
+                    meta_basefile = "metadata-" + (l_addr
+                    ).replace(":","-") + "." + basefile
                     metadata_name = "/".join(l_filename.split("/")[:-1]) + "/" + meta_basefile
                     os.remove(metadata_name) 
 

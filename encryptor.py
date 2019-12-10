@@ -5,12 +5,10 @@ import datetime
 from Crypto.PublicKey import RSA
 from Crypto.Signature import pkcs1_15
 from Crypto.Hash import SHA256
-from Crypto.Util.Padding import pad
 import os
-from utils import writeToFile, readFile
+from utils import *
 from constants import *
 from time import sleep
-from base64 import b64encode
 
 
 def encryptFile(filename, symmetric_key, nonce = get_random_bytes(15)):
@@ -50,26 +48,6 @@ def encryptMetadata(filename, symmetric_key, digest, nonce, device):
     print("[ENC] Created metadata file")
     writeToFile(metadataFile, ciphertext, "wb")
 
-# advanced
-def encryptMetadataWithSymmetric(filename, symmetric_key, digest_file, nonce_file, share_key):
-    # content from the share file that was encrypted
-    content = symmetric_key + CNT + digest_file + CNT + nonce_file
-    print("[ENC] Metadata content to encrypt:", content)
-
-    cipher = AES.new(share_key, AES.MODE_CBC)
-    ciphertext = cipher.encrypt(pad(content, 256))
-    iv = cipher.iv
-
-    print("ciphertext size:", len(ciphertext))
-
-    parts = filename.split("/")
-    base = '/'.join(parts[:-1])
-    metadataFile = base + "/metadata." + parts[-1]
-    print("[ENC] Created metadata file")
-    writeToFile(metadataFile, ciphertext, "wb")
-    #return digest, nonce
-    return iv
-
 
 def encryptFileWithDevice(filename, device):
     symmetric_key = generateSymmKey()
@@ -89,9 +67,6 @@ def encryptFileWithManyDevices(filename, devices):
     symmetric_key = generateSymmKey()
     print("[MENU] Generated symmetric key")
     digest, nonce = encryptFile(filename, symmetric_key)
-    #print("[MENU] Encrypted file with share key")
-    #iv = encryptMetadataWithSymmetric(filename, symmetric_key, digest_file, nonce_file, share_key)
-    #print("[MENU] Encrypted metadata file with device ShareKey") 
     for d in devices:
         encryptMetadata(filename, symmetric_key, digest, nonce, d)
         print("[MENU] Encrypted metadata file with device PUK")
@@ -173,27 +148,3 @@ def verifyTimeStamp(btimestamp): #recebe byte array de timestamp
         return True
     else:
         return False
-
-#advanced version
-def sendShareKey(share_key, iv, pukFile, device):
-    device.sendMessage("RS")
-
-    answer = device.readMessage(285).decode("utf-8")
-    if answer != "OK":
-        print("[ENC] Could not send shared key to device %s" % (device.addr))
-        return
-    
-    puk = RSA.import_key(open(pukFile).read())
-    cipher_rsa = PKCS1_OAEP.new(puk)
-    content = share_key + CNT + iv
-    print("[ENC] Encrypting sharekey+iv for metadata of shared file:", content)
-    ciphertext = cipher_rsa.encrypt(content)
-    print("[ENC] Done encrypting share metadata")
-    print("[ENC] Sending share metadata")
-    device.sendMessage(ciphertext)
-
-    answer = device.readMessage(285).decode("utf-8")
-    if answer != "OK":
-        print("[ENC] Did not receive confirmation from device %s" % (device.addr))
-    else:
-        print("[ENC] Received confirmation from device %s" % (device.addr))

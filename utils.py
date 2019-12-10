@@ -2,7 +2,6 @@ import hashlib
 import subprocess
 import os
 from constants import *
-from Crypto.Util.Padding import unpad
 
 
 def writeToFile(filename, data, mode):
@@ -55,9 +54,21 @@ def getEncryptableFiles(btManager):
 
 
 def getOpenableFiles(btManager):
-    lista = [file for file in sorted(os.listdir(FILE_SYSTEM)) if not file.startswith("metadata")]
+    allfiles = [file for file in sorted(os.listdir(FILE_SYSTEM)) if not file.startswith("metadata")]
     device = btManager.active_device
-    filestoremove = []
+    linkedfiles = readFile(LINKEDFILES)
+    openable = []
+    for f in allfiles:
+        if f not in [f.split("|")[1].split("/")[-1] for f in linkedfiles]:
+            openable.append(f)
+    
+    for lf in linkedfiles:
+        if device.addr == lf.split("|")[0]:
+            f = lf.split("|")[1].split("/")[-1]
+            if f not in openable: openable.append(f)
+
+    '''
+    #filestoremove = []
     filesnottoremove = []
     for line in readFile(LINKEDFILES):
         parts = line.split("|")
@@ -71,8 +82,10 @@ def getOpenableFiles(btManager):
     for rem in filestoremove:
         if rem not in filesnottoremove:
             lista.remove(rem)
+    '''
+
     
-    return lista
+    return sorted(openable)
 
 
 def convertToBytes(m):
