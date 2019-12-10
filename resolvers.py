@@ -23,7 +23,7 @@ def resolveKeyInitMenu(menu, key, btManager):
         elif key == 2:
             return Menu(OPEN_FILE_MENU, options=getOpenableFiles(btManager), resolve_key_function=resolveKeyOpenFileMenu)
         elif key == 3:
-            return Menu(SHARE_FILE_MENU, options=getOpenableFiles(btManager), resolve_key_function=resolveKeyShareFileMenu)                 
+            return Menu(SHARE_FILE_MENU, options=getEncryptableFiles(btManager), resolve_key_function=resolveKeyShareFileMenu)                 
 
 
 
@@ -44,6 +44,7 @@ def resolveKeyShareFileMenu(menu, key, btManager):
     if active_device.isConnected():
         # key to encrypt metadata which all share_devices can open with this key
         share_key = generateSymmKey()
+        #print("[MENU] Share key:", share_key)
 
         # simulate each file encrypting the filename to register all in the LINK database
         iv = encryptFileWithManyDevices(filename, share_devices, share_key)
@@ -80,15 +81,17 @@ def resolveKeyEncryptMenu(menu, key, btManager):
     return menu
 
 
-def resolveKeyOpenFileMenu(menu, key, btManager):
-    filename = getFileName(key, getOpenableFiles(btManager))
-    device = btManager.active_device
-    
+def submenuUnlink(btManager):
     # show sub-menu asking if user wants to unlink forever or not
     submenu = Menu(UNLINK_FOR_EVER_MENU, options=UNLINK_FOR_EVER_MENU_OPTIONS, add_return=False, resolve_key_function=resolveUnlinkSubMenu)
     key = submenu.show()
-    unlink = submenu.resolveKey(key, btManager)
-    #print("UNLINK:", unlink)
+    return submenu.resolveKey(key, btManager)
+
+def resolveKeyOpenFileMenu(menu, key, btManager):
+    filename = getFileName(key, getOpenableFiles(btManager))
+    device = btManager.active_device
+
+    unlink = submenuUnlink(btManager)
 
     # check if file was already decrypted by the device
     lines = readFile(LINKEDFILES, 'r')

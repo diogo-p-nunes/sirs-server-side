@@ -2,6 +2,7 @@ import hashlib
 import subprocess
 import os
 from constants import *
+from Crypto.Util.Padding import unpad
 
 
 def writeToFile(filename, data, mode):
@@ -69,6 +70,7 @@ def convertToBytes(m):
 def splitMessage(m, isPUK=False, isMetadata=False):
     if isMetadata:
         #print("isMetadata")
+        print(m)
         bcontent = m[:53]
         btimestamp = m[56:75]
         bsignature = m[78:]

@@ -56,9 +56,6 @@ def encryptMetadataWithSymmetric(filename, symmetric_key, digest_file, nonce_fil
     content = symmetric_key + CNT + digest_file + CNT + nonce_file
     print("[ENC] Metadata content to encrypt:", content)
 
-    #nonce = get_random_bytes(15)
-    #cipher = AES.new(share_key, AES.MODE_EAX, nonce=nonce)
-    #ciphertext, digest = cipher.encrypt_and_digest(pad(content, 256, style='pkcs7'))
     cipher = AES.new(share_key, AES.MODE_CBC)
     ciphertext = cipher.encrypt(pad(content, 256))
     iv = cipher.iv
