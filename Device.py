@@ -81,7 +81,7 @@ class Device:
         print("[DEVICE] Requesting metadata content")
         self.sendMessage("RE")
         answer = self.readMessage(285).decode("utf-8")
-        metafile = FILE_SYSTEM + "metadata." + filename.split("/")[-1]
+        metafile = FILE_SYSTEM + "metadata-" + (self.addr).replace(":","-")+ "." + filename.split("/")[-1]
         if answer == "OK":
             print("[DEVICE] Sending metadata")
             self.sendMessage(readFile(metafile, "rb"))

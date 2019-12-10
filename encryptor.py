@@ -13,8 +13,7 @@ from time import sleep
 from base64 import b64encode
 
 
-def encryptFile(filename, symmetric_key):
-    nonce = get_random_bytes(15)
+def encryptFile(filename, symmetric_key, nonce = get_random_bytes(15)):
     cipher = AES.new(symmetric_key, AES.MODE_EAX, nonce=nonce)
     ciphertext, digest = cipher.encrypt_and_digest(readFile(filename, "rb"))
     writeToFile(filename, ciphertext, "wb")
@@ -32,13 +31,14 @@ def decryptFile(filename, symmetric_key, digest, nonce):
     content = cipher.decrypt_and_verify(ciphertext, digest)
     print("[ENC] Decrypted content")
     writeToFile(filename, content, "wb")
+    print("content:", content)
     print("[ENC] Wrote decrypted content to file")
     return
 
 
-def encryptMetadata(filename, symmetric_key, digest, nonce, pukFile):
+def encryptMetadata(filename, symmetric_key, digest, nonce, device):
     print("[ENC] Symm key:", symmetric_key)
-    puk = RSA.import_key(open(pukFile).read())
+    puk = RSA.import_key(open(device.getPukFilename()).read())
     cipher_rsa = PKCS1_OAEP.new(puk)
     content = symmetric_key + CNT + digest + CNT + nonce
     print("[ENC] Metadata content to encrypt:", content)
@@ -46,7 +46,7 @@ def encryptMetadata(filename, symmetric_key, digest, nonce, pukFile):
 
     parts = filename.split("/")
     base = '/'.join(parts[:-1])
-    metadataFile = base + "/metadata." + parts[-1]
+    metadataFile = base + "/metadata-" + (device.addr).replace(":", "-") + "." + parts[-1]
     print("[ENC] Created metadata file")
     writeToFile(metadataFile, ciphertext, "wb")
 
@@ -76,28 +76,30 @@ def encryptFileWithDevice(filename, device):
     print("[MENU] Generated symmetric key")
     digest, nonce = encryptFile(filename, symmetric_key)
     print("[MENU] Encrypted file with symmetric key")
-    encryptMetadata(filename, symmetric_key, digest, nonce, device.getPukFilename())
+    encryptMetadata(filename, symmetric_key, digest, nonce, device)
     print("[MENU] Encrypted metadata file with device PUK")
     # trash symmetric_key variable
     del symmetric_key
     print("[MENU] Deleted symmetric key")
+    writeToFile(LINKEDFILES, device.addr + "|" + filename + "|E" + "\n", "a")
 
 
 # advanced version
-def encryptFileWithManyDevices(filename, devices, share_key):
+def encryptFileWithManyDevices(filename, devices):
     symmetric_key = generateSymmKey()
     print("[MENU] Generated symmetric key")
-    digest_file, nonce_file = encryptFile(filename, symmetric_key)
-    print("[MENU] Encrypted file with share key")
-    iv = encryptMetadataWithSymmetric(filename, symmetric_key, digest_file, nonce_file, share_key)
-    print("[MENU] Encrypted metadata file with device ShareKey") 
-    for d in devices:     
+    digest, nonce = encryptFile(filename, symmetric_key)
+    #print("[MENU] Encrypted file with share key")
+    #iv = encryptMetadataWithSymmetric(filename, symmetric_key, digest_file, nonce_file, share_key)
+    #print("[MENU] Encrypted metadata file with device ShareKey") 
+    for d in devices:
+        encryptMetadata(filename, symmetric_key, digest, nonce, d)
+        print("[MENU] Encrypted metadata file with device PUK")
         writeToFile(LINKEDFILES, d.addr + "|" + filename + "|E" + "\n", "a")
+    
     # trash symmetric_key variable
     del symmetric_key
     print("[MENU] Deleted symmetric key")
-    #return digest_metadata, nonce_metadata
-    return iv
 
 # intermediate version
 def addTimestamp(m):

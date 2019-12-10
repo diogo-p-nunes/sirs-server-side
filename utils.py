@@ -46,9 +46,9 @@ def getEncryptableFiles(btManager):
     for line in readFile(LINKEDFILES):  
         parts = line.split("|")
         partfile = (parts[1].split("/"))[-1]
-        if partfile in lista and parts[0] != btManager.active_device.addr: 
-            #assim SÓ faz remove de files que ja estejam encryptados 
-            # por outras pessoas ou com outras pessoas
+        if partfile in lista: # and parts[0] != btManager.active_device.addr: 
+            #assim SÓ faz remove de files que ja estejam encryptados:
+            # por outras pessoas ou com outras pessoas > ou seja pode fazer share de ficheiros encryptados apenas por ele
             lista.remove(partfile)
 
     return lista
@@ -62,6 +62,7 @@ def getOpenableFiles(btManager):
     for line in readFile(LINKEDFILES):
         parts = line.split("|")
         if parts[0] != device.addr: 
+            #lista.remove((parts[1].split("/"))[-1])
             filestoremove.append((parts[1].split("/"))[-1])
         if parts[0] == device.addr:
             filesnottoremove.append((parts[1].split("/"))[-1])
@@ -84,7 +85,7 @@ def convertToBytes(m):
 def splitMessage(m, isPUK=False, isMetadata=False):
     if isMetadata:
         #print("isMetadata")
-        print(m)
+        #print(m)
         bcontent = m[:53]
         btimestamp = m[56:75]
         bsignature = m[78:]

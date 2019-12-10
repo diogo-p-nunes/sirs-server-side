@@ -43,19 +43,21 @@ def resolveKeyShareFileMenu(menu, key, btManager):
 
     if active_device.isConnected():
         # key to encrypt metadata which all share_devices can open with this key
-        share_key = generateSymmKey()
+        #share_key = generateSymmKey()
         #print("[MENU] Share key:", share_key)
 
         # simulate each file encrypting the filename to register all in the LINK database
-        iv = encryptFileWithManyDevices(filename, share_devices, share_key)
+        #iv = encryptFileWithManyDevices(filename, share_devices, share_key)
 
-        for d in share_devices:
+        #for d in share_devices:
             # for each device, send share_key, digest and nonce of metadata encryption with share_key
             # they need these last two items to decrypt the metadata later
-            sendShareKey(share_key, iv, d.getPukFilename(), d)       
+        #    sendShareKey(share_key, iv, d.getPukFilename(), d)       
 
-        del share_key
-        print("[MENU] Deleted share key")
+        #del share_key
+        #print("[MENU] Deleted share key")
+        
+        encryptFileWithManyDevices(filename, share_devices)
         
     else:
         print("[MENU] Device is not connected")
@@ -70,7 +72,7 @@ def resolveKeyEncryptMenu(menu, key, btManager):
     device = btManager.active_device
     if device.isConnected():
         encryptFileWithDevice(filename, device)
-        writeToFile(LINKEDFILES, device.addr + "|" + filename + "|E" + "\n", "a")
+        
         print("[MENU] Added file link to databases")
         print("[MENU] File encrypted with device")
         menu.setOptions(getEncryptableFiles(btManager))
@@ -125,7 +127,7 @@ def resolveKeyOpenFileMenu(menu, key, btManager):
                 
                 if changed_bit and unlink:
                     basefile = l_filename.split("/")[-1]
-                    meta_basefile = "metadata." + basefile
+                    meta_basefile = "metadata-" + (device.addr).replace(":","-") + "." + basefile
                     metadata_name = "/".join(l_filename.split("/")[:-1]) + "/" + meta_basefile
                     os.remove(metadata_name) 
 
