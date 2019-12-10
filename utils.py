@@ -66,24 +66,6 @@ def getOpenableFiles(btManager):
         if device.addr == lf.split("|")[0]:
             f = lf.split("|")[1].split("/")[-1]
             if f not in openable: openable.append(f)
-
-    '''
-    #filestoremove = []
-    filesnottoremove = []
-    for line in readFile(LINKEDFILES):
-        parts = line.split("|")
-        if parts[0] != device.addr: 
-            #lista.remove((parts[1].split("/"))[-1])
-            filestoremove.append((parts[1].split("/"))[-1])
-        if parts[0] == device.addr:
-            filesnottoremove.append((parts[1].split("/"))[-1])
-    #check if any of the files to remove is a shared file 
-    # because she has the right to open her share files  
-    for rem in filestoremove:
-        if rem not in filesnottoremove:
-            lista.remove(rem)
-    '''
-
     
     return sorted(openable)
 
@@ -117,3 +99,26 @@ def splitMessage(m, isPUK=False, isMetadata=False):
     #print(bsignature)
     return (bcontent, btimestamp, bsignature)
 
+
+def removeCoreDuplicates(l):
+    uniques = list(set(l))
+    duplicates = l
+    for u in uniques:
+        duplicates.remove(u)
+    return [x for x in uniques if x not in duplicates]
+        
+
+def getPrivateAndSharedFiles():
+    lines = readFile(LINKEDFILES, 'r')
+    linkedFiles = [f.split("|")[1] for f in lines]
+    private = removeCoreDuplicates(linkedFiles)
+    shared = {}
+    for f in linkedFiles:
+        if f not in private:
+            devices = []
+            for line in lines:
+                l_addr, l_filename, _ = line.replace('\n', '').split('|')
+                if l_filename == f:
+                    devices.append(l_addr)
+            shared[f] = devices
+    return private, shared

@@ -43,7 +43,6 @@ def resolveKeyShareFileMenu(menu, key, btManager):
 
     if active_device.isConnected():       
         encryptFileWithManyDevices(filename, share_devices)
-        
     else:
         print("[MENU] Device is not connected")
         
@@ -57,7 +56,7 @@ def resolveKeyEncryptMenu(menu, key, btManager):
     device = btManager.active_device
     if device.isConnected():
         encryptFileWithDevice(filename, device)
-        
+        writeToFile(LINKEDFILES, device.addr + "|" + filename + "|E" + "\n", "a")
         print("[MENU] Added file link to databases")
         print("[MENU] File encrypted with device")
         menu.setOptions(getEncryptableFiles(btManager))

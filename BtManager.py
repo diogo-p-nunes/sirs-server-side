@@ -84,4 +84,4 @@ class BtManager:
         return [d.addr for d in self.connected_devices]
 
     def getAllDevicesIDExcept(self, active_device):
-        return [d.addr for d in self.connected_devices if d.addr != active_device.addr]
+        return [d.addr for d in self.connected_devices if d.addr != active_device.addr]        
