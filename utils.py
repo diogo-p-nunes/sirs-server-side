@@ -43,20 +43,34 @@ def checkDeviceConnected(btManager):
 
 def getEncryptableFiles(btManager):
     lista = [file for file in sorted(os.listdir(FILE_SYSTEM)) if not file.startswith("metadata")]
-    for line in readFile(LINKEDFILES):
-        # remove every file that is not public
+    for line in readFile(LINKEDFILES):  
         parts = line.split("|")
-        lista.remove((parts[1].split("/"))[-1])
+        partfile = (parts[1].split("/"))[-1]
+        if partfile in lista and parts[0] != btManager.active_device.addr: 
+            #assim SÓ faz remove de files que ja estejam encryptados 
+            # por outras pessoas ou com outras pessoas
+            lista.remove(partfile)
+
     return lista
 
 
 def getOpenableFiles(btManager):
     lista = [file for file in sorted(os.listdir(FILE_SYSTEM)) if not file.startswith("metadata")]
     device = btManager.active_device
+    filestoremove = []
+    filesnottoremove = []
     for line in readFile(LINKEDFILES):
         parts = line.split("|")
-        if parts[0] != device.addr:
-            lista.remove((parts[1].split("/"))[-1])
+        if parts[0] != device.addr: 
+            filestoremove.append((parts[1].split("/"))[-1])
+        if parts[0] == device.addr:
+            filesnottoremove.append((parts[1].split("/"))[-1])
+    #check if any of the files to remove is a shared file 
+    # because she has the right to open her share files  
+    for rem in filestoremove:
+        if rem not in filesnottoremove:
+            lista.remove(rem)
+    
     return lista
 
 
