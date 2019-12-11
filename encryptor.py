@@ -134,7 +134,9 @@ def confAssurance(devices, shutting_down=False):
                     encryptFileWithDevice(l_filename, device)
                     lf = lf.replace('|D', '|E')
                     print("[CONFASS] File %s done." % l_filename)
-                if lf not in newlines and l_filename not in shared.keys(): newlines.append(lf)
+                
+                newlines_files = [nl.split("|")[1] for nl in newlines]
+                if l_filename not in newlines_files and l_filename not in shared.keys(): newlines.append(lf)
             
             for fs, share_addr in shared.items():
                 anyIsConnected = False
@@ -158,7 +160,7 @@ def confAssurance(devices, shutting_down=False):
                             lf = ds.addr + "|" + fs + "|D" + "\n"
                         else:
                             lf = ds.addr + "|" + fs + "|E" + "\n"
-                            
+
                         if lf not in newlines: 
                             newlines.append(lf)
                 else:
