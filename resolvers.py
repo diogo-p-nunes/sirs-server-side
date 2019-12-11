@@ -77,8 +77,6 @@ def resolveKeyOpenFileMenu(menu, key, btManager):
     filename = getFileName(key, getOpenableFiles(btManager))
     device = btManager.active_device
 
-    unlink = submenuUnlink(btManager)
-
     # check if file was already decrypted by the device
     lines = readFile(LINKEDFILES, 'r')
     newlines = []
@@ -90,6 +88,9 @@ def resolveKeyOpenFileMenu(menu, key, btManager):
             return menu
 
         elif l_addr == device.addr and l_filename == filename and l_ebit == 'E':
+            
+            unlink = submenuUnlink(btManager)
+
             print("[MENU] Pre-decryption:", readFile(filename, "rb"))
             symmetric_key, digest, nonce = device.requestMetadataContent(filename)
             decryptFile(filename, symmetric_key, digest, nonce)

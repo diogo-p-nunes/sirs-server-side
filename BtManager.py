@@ -45,10 +45,10 @@ class BtManager:
         return len(self.connected_devices) > 0 
 
     def connectedDevices(self, key):
-        return self.connected_devices[key]
+        return [d for d in self.connected_devices if d.isConnected()][key]
 
     def connectedDevicesExceptGetIndexs(self, active_device, keys):
-        all_devices_except = [d for d in self.connected_devices if d.addr != active_device.addr]
+        all_devices_except = [d for d in self.connected_devices if d.addr != active_device.addr and d.isConnected()]
         r = []
         for k in keys:
             r.append(all_devices_except[k])

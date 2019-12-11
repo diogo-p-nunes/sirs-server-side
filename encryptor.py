@@ -146,13 +146,21 @@ def confAssurance(devices, shutting_down=False):
                         break
                 
                 if anyIsConnected:
-                    #print("JE SUIS ICI")
                     for ds in share_devices:
-                        print("ds addr: ", ds.addr)
-                        lf = ds.addr + "|" + fs + "|D" + "\n"
+                        flag = False
+                        for lune in allLinkedFiles:
+                            l_addr, l_filename, l_ebit = lune.replace('\n', '').split('|')
+                            if l_addr == device.addr and l_filename == fs and l_ebit == 'D':
+                                flag = True
+                                break
+                        
+                        if flag:
+                            lf = ds.addr + "|" + fs + "|D" + "\n"
+                        else:
+                            lf = ds.addr + "|" + fs + "|E" + "\n"
+                            
                         if lf not in newlines: 
                             newlines.append(lf)
-                            print("faz append")
                 else:
                     #print("share devices:", share_devices, share_addr)
                     flag = False
@@ -171,39 +179,9 @@ def confAssurance(devices, shutting_down=False):
             device.setDoneConfAssurance(True)
             #devices.remove(device)
 
-
     if len(newlines) != 0: writeToFile(LINKEDFILES, ''.join(newlines), 'w')
-                    
-
     #print("private:", private)
     #print("shared:", shared)
-
-    '''
-    for device in devices:
-        if (not device.isConnected() and not device.doneConfAssurance) or shutting_down:
-            print("[CONFASS] Device %s disconnected." % device.addr)
-            print("[CONFASS] Performing Conf-Assurance.")
-
-            for fp in private:
-                # check if private file was decrypted by the device in this session
-                lines = readFile(LINKEDFILES, 'r')
-                newlines = []
-                for line in lines:
-                    l_addr, l_filename, l_ebit = line.replace('\n', '').split('|')
-                    if l_filename in shared.keys():
-                        continue
-                    if l_addr == device.addr and fp == l_filename and l_ebit == 'D':
-                        # encrypt file again
-                        print("[CONFASS] Encrypting file:", l_filename)
-                        encryptFileWithDevice(l_filename, device)
-                        line = line.replace('|D', '|E')
-                        print("[CONFASS] File %s done." % l_filename)
-                    newlines.append(line)
-
-            writeToFile(LINKEDFILES, ''.join(newlines), 'w')
-            device.setDoneConfAssurance(True)
-            devices.remove(device)
-    '''
 
 
 # intermediate version
